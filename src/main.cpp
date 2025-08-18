@@ -103,6 +103,7 @@ void showDeviceInfo() {
       ispProgrammer->printFuses();
     }
     ispProgrammer->exitProgrammingMode();
+    ispProgrammer->end();
   }
 }
 
