@@ -137,14 +137,29 @@ void printConnections() {
 }
 
 bool initializeFilesystem() {
-  if (!LittleFS.begin(AUTO_FORMAT_FS)) {
-    Serial.println("Failed to mount LittleFS");
-    return false;
+  Serial.println("Mounting LittleFS...");
+
+  // Try to mount without formatting first
+  if (!LittleFS.begin(false)) {
+    Serial.println("Mount failed, trying with format...");
+
+    // If mount fails, try with format enabled
+    if (!LittleFS.begin(true)) {
+      Serial.println("Failed to mount LittleFS even with format");
+      return false;
+    }
+    Serial.println("LittleFS formatted and mounted");
+  } else {
+    Serial.println("LittleFS mounted successfully");
   }
 
-  listFiles();
+  // Show filesystem info
+  size_t totalBytes = LittleFS.totalBytes();
+  size_t usedBytes = LittleFS.usedBytes();
+  Serial.printf("Filesystem: %zu total, %zu used, %zu free bytes\n", totalBytes,
+                usedBytes, totalBytes - usedBytes);
 
-  Serial.println("LittleFS mounted successfully");
+  listFiles();
   return true;
 }
 

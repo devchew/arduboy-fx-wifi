@@ -36,7 +36,7 @@
 // FILESYSTEM CONFIGURATION
 // ==========================================
 // Enable automatic filesystem formatting if mount fails
-#define AUTO_FORMAT_FS true
+#define AUTO_FORMAT_FS false
 
 // ==========================================
 // PROGRAMMING CONFIGURATION
