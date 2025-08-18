@@ -3,5 +3,14 @@
         "activityBar.background": "#083516",
         "titleBar.activeBackground": "#0B4B1F",
         "titleBar.activeForeground": "#F0FDF4"
+    },
+    "files.associations": {
+        "*.tcc": "cpp",
+        "numeric": "cpp",
+        "fstream": "cpp",
+        "istream": "cpp",
+        "ostream": "cpp",
+        "system_error": "cpp",
+        "typeinfo": "cpp"
     }
 }
