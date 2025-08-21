@@ -1,20 +1,20 @@
-#ifndef ARDUBOY_H
-#define ARDUBOY_H
+#ifndef ARDUBOY_CONTROLLER_H
+#define ARDUBOY_CONTROLLER_H
 
 #include <Arduino.h>
 
 #include "HexParser.h"
 #include "ISPProgrammer.h"
 
-class Arduboy {
+class ArduboyController {
  private:
   HexParser* hexParser;
   ISPProgrammer* ispProgrammer;
   bool initialized;
 
  public:
-  Arduboy();
-  ~Arduboy();
+  ArduboyController();
+  ~ArduboyController();
 
   bool begin();
   void end();
@@ -22,8 +22,10 @@ class Arduboy {
   bool checkConnection();
   bool flash(const String& filename);
   bool reset();
+  bool powerOn();
+  bool powerOff();
 
   void printDeviceInfo();
 };
 
-#endif  // ARDUBOY_H
+#endif  // ARDUBOY_CONTROLLER_H

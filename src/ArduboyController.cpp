@@ -1,13 +1,24 @@
-#include "Arduboy.h"
+#include "ArduboyController.h"
 
 #include "config.h"
 
-Arduboy::Arduboy()
+// ==========================================
+// IHEX CALLBACK FUNCTION
+// ==========================================
+// Global callback function required by kk_ihex library
+extern "C" ihex_bool_t ihex_data_read(struct ihex_state* ihex,
+                                      ihex_record_type_t type,
+                                      ihex_bool_t checksum_error) {
+  // Forward to HexParser static callback
+  return HexParser::ihex_data_callback(ihex, type, checksum_error);
+}
+
+ArduboyController::ArduboyController()
     : hexParser(nullptr), ispProgrammer(nullptr), initialized(false) {}
 
-Arduboy::~Arduboy() { end(); }
+ArduboyController::~ArduboyController() { end(); }
 
-bool Arduboy::begin() {
+bool ArduboyController::begin() {
   if (initialized) {
     return true;
   }
@@ -19,9 +30,9 @@ bool Arduboy::begin() {
     return false;
   }
 
-  // Initialize ISP programmer
+  // Initialize ISP programmer (using default hardware SPI pins)
   ispProgrammer =
-      new ISPProgrammer(ISP_RESET_PIN, ISP_SCK_PIN, ISP_MOSI_PIN, ISP_MISO_PIN);
+      new ISPProgrammer(ISP_RESET_PIN, SCK, MOSI, MISO);
   if (!ispProgrammer) {
     Serial.println("Failed to create ISP programmer");
     delete hexParser;
@@ -33,7 +44,7 @@ bool Arduboy::begin() {
   return true;
 }
 
-void Arduboy::end() {
+void ArduboyController::end() {
   if (hexParser) {
     delete hexParser;
     hexParser = nullptr;
@@ -45,9 +56,9 @@ void Arduboy::end() {
   initialized = false;
 }
 
-bool Arduboy::checkConnection() {
+bool ArduboyController::checkConnection() {
   if (!initialized || !ispProgrammer) {
-    Serial.println("Arduboy not initialized");
+    Serial.println("ArduboyController not initialized");
     return false;
   }
 
@@ -61,16 +72,16 @@ bool Arduboy::checkConnection() {
     Serial.println("Arduboy connected successfully");
     ispProgrammer->exitProgrammingMode();
   } else {
-    Serial.println("Failed to connect to Arduboy");
+    Serial.println("Failed to connect to Arduboy device");
   }
 
   ispProgrammer->end();
   return connected;
 }
 
-bool Arduboy::flash(const String& filename) {
+bool ArduboyController::flash(const String& filename) {
   if (!initialized || !hexParser || !ispProgrammer) {
-    Serial.println("Arduboy not initialized");
+    Serial.println("ArduboyController not initialized");
     return false;
   }
 
@@ -123,9 +134,9 @@ bool Arduboy::flash(const String& filename) {
   return success;
 }
 
-bool Arduboy::reset() {
+bool ArduboyController::reset() {
   if (!initialized || !ispProgrammer) {
-    Serial.println("Arduboy not initialized");
+    Serial.println("ArduboyController not initialized");
     return false;
   }
 
@@ -146,9 +157,9 @@ bool Arduboy::reset() {
   return true;
 }
 
-void Arduboy::printDeviceInfo() {
+void ArduboyController::printDeviceInfo() {
   if (!initialized || !ispProgrammer) {
-    Serial.println("Arduboy not initialized");
+    Serial.println("ArduboyController not initialized");
     return;
   }
 
@@ -166,4 +177,28 @@ void Arduboy::printDeviceInfo() {
   }
 
   ispProgrammer->end();
+}
+
+bool ArduboyController::powerOn() {
+  Serial.println("Powering on Arduboy...");
+  
+  // Set power control pin as output and enable power
+  pinMode(POWER_CONTROL_PIN, OUTPUT);
+  digitalWrite(POWER_CONTROL_PIN, HIGH);
+  
+  // Give some time for power to stabilize
+  delay(100);
+  
+  Serial.println("Arduboy powered on");
+  return true;
+}
+
+bool ArduboyController::powerOff() {
+  Serial.println("Powering off Arduboy...");
+  
+  // Disable power
+  digitalWrite(POWER_CONTROL_PIN, LOW);
+  
+  Serial.println("Arduboy powered off");
+  return true;
 }
