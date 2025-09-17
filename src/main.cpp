@@ -7,6 +7,7 @@
 
 #include "ArduboyController.h"
 #include "FileSystemManager.h"
+#include "OLEDController.h"
 #include "SerialCLI.h"
 #include "config.h"
 
@@ -16,6 +17,7 @@
 ArduboyController* arduboy = nullptr;
 FileSystemManager* fileSystem = nullptr;
 SerialCLI* cli = nullptr;
+OLEDController* oled = nullptr;
 
 // ==========================================
 // UTILITY FUNCTIONS
@@ -71,12 +73,26 @@ void setup() {
     return;
   }
 
+  // Initialize OLEDController
+  oled = new OLEDController();
+  if (!oled || !oled->begin()) {
+    Serial.println("Failed to initialize OLEDController!");
+    return;
+  }
+
   // Initialize SerialCLI
   cli = new SerialCLI();
-  if (!cli || !cli->begin(arduboy, fileSystem)) {
+  if (!cli || !cli->begin(arduboy, fileSystem, oled)) {
     Serial.println("Failed to initialize Serial CLI!");
     return;
   }
+
+  arduboy->powerOff();
+  oled->enable();
+  oled->helloWorld();
+
+  
+
 }
 
 void loop() {

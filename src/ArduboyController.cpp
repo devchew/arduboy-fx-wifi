@@ -40,6 +40,8 @@ bool ArduboyController::begin() {
     return false;
   }
 
+  digitalWrite(ISP_RESET_PIN, LOW); // Ensure reset pin is low
+
   initialized = true;
   return true;
 }

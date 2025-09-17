@@ -2,23 +2,30 @@
 
 #include "ArduboyController.h"
 #include "FileSystemManager.h"
+#include "OLEDController.h"
 
 SerialCLI::SerialCLI()
-    : arduboy(nullptr), fileSystem(nullptr), initialized(false) {}
+    : arduboy(nullptr),
+      fileSystem(nullptr),
+      oled(nullptr),
+      initialized(false) {}
 
 SerialCLI::~SerialCLI() { end(); }
 
 bool SerialCLI::begin(ArduboyController* arduboyController,
-                      FileSystemManager* fsManager) {
+                      FileSystemManager* fsManager,
+                      OLEDController* oledController) {
   if (initialized) {
     return true;
   }
 
   arduboy = arduboyController;
   fileSystem = fsManager;
+  oled = oledController;
 
-  if (!arduboy || !fileSystem) {
-    Serial.println("Invalid controller or filesystem manager");
+  if (!arduboy || !fileSystem || !oled) {
+    Serial.println(
+        "Invalid controller, filesystem manager, or OLED controller");
     return false;
   }
 
@@ -31,6 +38,7 @@ void SerialCLI::end() {
   initialized = false;
   arduboy = nullptr;
   fileSystem = nullptr;
+  oled = nullptr;
 }
 
 void SerialCLI::processInput() {
@@ -86,6 +94,14 @@ void SerialCLI::processInput() {
     handleDelete(args);
   } else if (command == "format") {
     handleFormat();
+  } else if (command == "oledreset") {
+    handleOLEDReset();
+  } else if (command == "oledon" || command == "oledenable") {
+    handleOLEDEnable();
+  } else if (command == "oledoff" || command == "oleddisable") {
+    handleOLEDDisable();
+  } else if (command == "oledhello") {
+    handleOLEDHello();
   } else {
     printError("Unknown command: " + command +
                ". Type 'help' for available commands.");
@@ -116,6 +132,13 @@ void SerialCLI::handleHelp() {
   Serial.println("  poweron          - Turn on Arduboy power");
   Serial.println("  poweroff         - Turn off Arduboy power");
   Serial.println();
+  Serial.println("OLED Commands:");
+  Serial.println("  oledreset        - Reset OLED display");
+  Serial.println("  oledon, oledenable - Enable OLED display");
+  Serial.println("  oledoff, oleddisable - Disable OLED display");
+  Serial.println("  oledtoggle       - Toggle OLED display state");
+  Serial.println("  oledstatus       - Show OLED status");
+  Serial.println();
   Serial.println("File System Commands:");
   Serial.println("  list, ls [path]  - List files and directories");
   Serial.println("  read, cat <file> - Read and display file content");
@@ -125,6 +148,8 @@ void SerialCLI::handleHelp() {
   Serial.println();
   Serial.println("Examples:");
   Serial.println("  flash firmware.hex");
+  Serial.println("  oledreset");
+  Serial.println("  oledon");
   Serial.println("  list /");
   Serial.println("  read config.txt");
   Serial.println("  write test.txt Hello World");
@@ -359,6 +384,58 @@ void SerialCLI::handleFormat() {
   } else {
     Serial.println("Format operation cancelled");
   }
+}
+
+// ==========================================
+// OLED COMMAND HANDLERS
+// ==========================================
+
+void SerialCLI::handleOLEDReset() {
+  if (!oled) {
+    printError("OLED controller not initialized");
+    return;
+  }
+
+  if (oled->reset()) {
+    printSuccess("OLED reset completed");
+  } else {
+    printError("OLED reset failed");
+  }
+}
+
+void SerialCLI::handleOLEDEnable() {
+  if (!oled) {
+    printError("OLED controller not initialized");
+    return;
+  }
+
+  if (oled->enable()) {
+    printSuccess("OLED enabled");
+  } else {
+    printError("Failed to enable OLED");
+  }
+}
+
+void SerialCLI::handleOLEDDisable() {
+  if (!oled) {
+    printError("OLED controller not initialized");
+    return;
+  }
+
+  if (oled->disable()) {
+    printSuccess("OLED disabled");
+  } else {
+    printError("Failed to disable OLED");
+  }
+}
+
+void SerialCLI::handleOLEDHello() {
+  if (!oled) {
+    printError("OLED controller not initialized");
+    return;
+  }
+
+  oled->helloWorld();
 }
 
 // ==========================================

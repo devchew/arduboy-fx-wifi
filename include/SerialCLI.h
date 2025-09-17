@@ -5,11 +5,13 @@
 
 class ArduboyController;
 class FileSystemManager;
+class OLEDController;
 
 class SerialCLI {
 private:
   ArduboyController* arduboy;
   FileSystemManager* fileSystem;
+  OLEDController* oled;
   bool initialized;
 
   // Command handlers
@@ -26,6 +28,12 @@ private:
   void handleDelete(const String& filename);
   void handleFormat();
 
+  // OLED control handlers
+  void handleOLEDReset();
+  void handleOLEDEnable();
+  void handleOLEDDisable();
+  void handleOLEDHello();
+
   // Utility functions
   void printWelcome();
   void printPrompt();
@@ -36,7 +44,8 @@ public:
   SerialCLI();
   ~SerialCLI();
 
-  bool begin(ArduboyController* arduboyController, FileSystemManager* fsManager);
+  bool begin(ArduboyController* arduboyController, FileSystemManager* fsManager,
+             OLEDController* oledController);
   void end();
   void processInput();
   void update();

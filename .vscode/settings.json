@@ -14,6 +14,19 @@
         "typeinfo": "cpp",
         "memory": "cpp",
         "random": "cpp",
-        "optional": "cpp"
+        "optional": "cpp",
+        "array": "cpp",
+        "cmath": "cpp",
+        "deque": "cpp",
+        "string": "cpp",
+        "unordered_map": "cpp",
+        "unordered_set": "cpp",
+        "vector": "cpp",
+        "exception": "cpp",
+        "functional": "cpp",
+        "string_view": "cpp",
+        "initializer_list": "cpp",
+        "sstream": "cpp",
+        "streambuf": "cpp"
     }
 }
