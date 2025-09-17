@@ -181,11 +181,12 @@ void ArduboyController::printDeviceInfo() {
 
 bool ArduboyController::powerOn() {
   Serial.println("Powering on Arduboy...");
-  
+
   // Set power control pin as output and enable power
-  pinMode(POWER_CONTROL_PIN, OUTPUT);
-  digitalWrite(POWER_CONTROL_PIN, HIGH);
-  
+  // pinMode(POWER_CONTROL_PIN, OUTPUT);
+  // digitalWrite(POWER_CONTROL_PIN, HIGH);
+  digitalWrite(ISP_RESET_PIN, HIGH);
+
   // Give some time for power to stabilize
   delay(100);
   
@@ -195,10 +196,11 @@ bool ArduboyController::powerOn() {
 
 bool ArduboyController::powerOff() {
   Serial.println("Powering off Arduboy...");
-  
+
   // Disable power
-  digitalWrite(POWER_CONTROL_PIN, LOW);
-  
+  // digitalWrite(POWER_CONTROL_PIN, LOW);
+  digitalWrite(ISP_RESET_PIN, LOW);
+
   Serial.println("Arduboy powered off");
   return true;
 }
