@@ -2,6 +2,7 @@
 #define SERIALCLI_H
 
 #include <Arduino.h>
+#include <SimpleCLI.h>
 
 class ArduboyController;
 class FileSystemManager;
@@ -13,6 +14,7 @@ private:
   FileSystemManager* fileSystem;
   OLEDController* oled;
   bool initialized;
+  SimpleCLI cli;
 
   // Command handlers
   void handleHelp();
@@ -30,8 +32,8 @@ private:
 
   // OLED control handlers
   void handleOLEDReset();
-  void handleOLEDEnable();
-  void handleOLEDDisable();
+  void handleOLEDMaster();
+  void handleOLEDSlave();
   void handleOLEDHello();
 
   // Utility functions

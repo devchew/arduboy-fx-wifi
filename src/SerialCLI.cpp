@@ -4,6 +4,9 @@
 #include "FileSystemManager.h"
 #include "OLEDController.h"
 
+
+
+
 SerialCLI::SerialCLI()
     : arduboy(nullptr),
       fileSystem(nullptr),
@@ -96,10 +99,10 @@ void SerialCLI::processInput() {
     handleFormat();
   } else if (command == "oledreset") {
     handleOLEDReset();
-  } else if (command == "oledon" || command == "oledenable") {
-    handleOLEDEnable();
-  } else if (command == "oledoff" || command == "oleddisable") {
-    handleOLEDDisable();
+  } else if (command == "oledmaster" || command == "oledenable") {
+    handleOLEDMaster();
+  } else if (command == "oledslave" || command == "oleddisable") {
+    handleOLEDSlave();
   } else if (command == "oledhello") {
     handleOLEDHello();
   } else {
@@ -181,6 +184,16 @@ void SerialCLI::handleInfo() {
   Serial.println("File System:");
   if (fileSystem && fileSystem->isInitialized()) {
     fileSystem->getInfo();
+  } else {
+    Serial.println("  Status: Not initialized");
+  }
+
+  // OLED status
+  Serial.println();
+  Serial.println("OLED Display:");
+  if (oled && oled->isInitialized()) {
+    Serial.println("  Status: Initialized");
+    Serial.printf("  Mode: %s\n", oled->isMasterMode() ? "MASTER" : "SLAVE");
   } else {
     Serial.println("  Status: Not initialized");
   }
@@ -403,29 +416,29 @@ void SerialCLI::handleOLEDReset() {
   }
 }
 
-void SerialCLI::handleOLEDEnable() {
+void SerialCLI::handleOLEDMaster() {
   if (!oled) {
     printError("OLED controller not initialized");
     return;
   }
 
-  if (oled->enable()) {
-    printSuccess("OLED enabled");
+  if (oled->master()) {
+    printSuccess("OLED set to MASTER mode");
   } else {
-    printError("Failed to enable OLED");
+    printError("Failed to set OLED to MASTER mode");
   }
 }
 
-void SerialCLI::handleOLEDDisable() {
+void SerialCLI::handleOLEDSlave() {
   if (!oled) {
     printError("OLED controller not initialized");
     return;
   }
 
-  if (oled->disable()) {
-    printSuccess("OLED disabled");
+  if (oled->slave()) {
+    printSuccess("OLED set to SLAVE mode");
   } else {
-    printError("Failed to disable OLED");
+    printError("Failed to set OLED to SLAVE mode");
   }
 }
 

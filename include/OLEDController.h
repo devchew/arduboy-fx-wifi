@@ -7,17 +7,9 @@
 class OLEDController {
  private:
   bool initialized;
-  bool enabled;
+  bool isMaster;
 
-  // Pin states
-  bool resetState;
-  bool enableState;
-
-  // Internal utility functions
-  void setResetPin(bool state);
-  void setEnablePin(bool state);
-
-  U8X8_SSD1306_128X64_NONAME_4W_HW_SPI u8x8;
+  U8X8_SSD1309_128X64_NONAME0_4W_HW_SPI u8x8;
 
  public:
   OLEDController();
@@ -30,10 +22,12 @@ class OLEDController {
 
   bool reset();
 
-  bool enable();
-  bool disable();
   bool slave();
   bool master();
+  bool isMasterMode() const { return isMaster; }
+
+  bool enable();
+  bool disable();
 
   void helloWorld();
 };

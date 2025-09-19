@@ -87,8 +87,10 @@ void setup() {
     return;
   }
 
+  delay(100);
+  
   arduboy->powerOff();
-  oled->enable();
+  oled->master();
   oled->helloWorld();
 
   
