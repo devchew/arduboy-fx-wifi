@@ -71,5 +71,8 @@ void loop() {
   if (cli) {
     cli->update();
   }
+  if (fxManager) {
+    fxManager->update();
+  }
   delay(10);
 }

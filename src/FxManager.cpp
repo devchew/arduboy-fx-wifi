@@ -21,12 +21,14 @@ bool FxManager::begin() {
     return false;
   }
 
+  // todo: SPI line sharing with oled fight each other
+
   // Initialize ArduboyController
-  arduboy = new ArduboyController();
-  if (!arduboy || !arduboy->begin()) {
-    Serial.println("Failed to initialize ArduboyController!");
-    return false;
-  }
+  //   arduboy = new ArduboyController();
+  //   if (!arduboy || !arduboy->begin()) {
+  //     Serial.println("Failed to initialize ArduboyController!");
+  //     return false;
+  //   }
 
   // Initialize OLEDController
   oled = new OLEDController();
@@ -36,7 +38,8 @@ bool FxManager::begin() {
   }
 
   initialized = true;
-  currentMode = FxMode::MASTER;
+
+  setMode(FxMode::MASTER);
   return true;
 }
 
@@ -56,19 +59,19 @@ void FxManager::setMode(FxMode mode) {
     case FxMode::GAME:
       oled->enable();
       oled->slave();
-      arduboy->powerOn();
+      //   arduboy->powerOn();
 
       Serial.println("Switched to GAME mode");
       break;
     case FxMode::MASTER:
-      arduboy->powerOff();
+      //   arduboy->powerOff();
       oled->enable();
       oled->master();
       oled->helloWorld();
       Serial.println("Switched to MASTER mode");
       break;
     case FxMode::PROGRAMMING:
-      arduboy->powerOn();
+      //   arduboy->powerOn();
       oled->clear();
       oled->disable();
       oled->slave();
@@ -142,20 +145,11 @@ void FxManager::reset() {
     return;
   }
 
-  setMode(FxMode::PROGRAMMING);
-
-  if (!arduboy || !arduboy->checkConnection()) {
-    Serial.println("[error] Arduboy not connected");
-    return;
-  }
-
   if (arduboy->reset()) {
     Serial.println("[success] Arduboy reset successfully");
   } else {
     Serial.println("[error] Failed to reset Arduboy");
   }
-
-  setMode(FxMode::MASTER);
 }
 
 void FxManager::printInfo() {

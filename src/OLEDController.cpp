@@ -77,7 +77,6 @@ bool OLEDController::slave() {
 
   u8x8.clearDisplay();
   u8x8.setPowerSave(1);  // Turn off display
-  currentScreen = 0;
   Serial.println("OLED set to SLAVE mode");
   return true;
 }
@@ -97,7 +96,6 @@ bool OLEDController::master() {
 
   u8x8.clearDisplay();
   u8x8.setPowerSave(0);  // Turn on display
-  currentScreen = 0;
   Serial.println("OLED set to MASTER mode");
   return true;
 }
@@ -145,7 +143,10 @@ void OLEDController::helloWorld() {
     return;
   }
 
-  currentScreen = 1;
+  u8x8.clearDisplay();
+  u8x8.setFont(u8x8_font_chroma48medium8_r);
+  u8x8.drawString(0, 1, "Hello esp!");
+  u8x8.drawString(0, 3, "Arduboy FX");
 }
 
 void OLEDController::clear() {
@@ -154,18 +155,10 @@ void OLEDController::clear() {
   }
 
   u8x8.clearDisplay();
-  currentScreen = 0;
 }
 
 void OLEDController::loop() {
   if (!initialized || !isMaster) {
     return;
-  }
-
-  if (currentScreen == 1) {
-    u8x8.clearDisplay();
-    u8x8.setFont(u8x8_font_chroma48medium8_r);
-    u8x8.drawString(0, 1, "Hello esp!");
-    u8x8.drawString(0, 3, "Arduboy FX");
   }
 }
