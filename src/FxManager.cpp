@@ -57,6 +57,7 @@ void FxManager::setMode(FxMode mode) {
 
   switch (mode) {
     case FxMode::GAME:
+      this->triStateSPIPins();
       oled->enable();
       oled->slave();
       arduboy->powerOn();
@@ -65,6 +66,7 @@ void FxManager::setMode(FxMode mode) {
       break;
     case FxMode::MASTER:
       arduboy->powerOff();
+      this->activateSPIPins();
       oled->enable();
       oled->master();
       oled->helloWorld();
@@ -72,6 +74,7 @@ void FxManager::setMode(FxMode mode) {
       break;
     case FxMode::PROGRAMMING:
       arduboy->powerOn();
+      this->activateSPIPins();
       oled->clear();
       oled->disable();
       oled->slave();
@@ -145,6 +148,10 @@ void FxManager::reset() {
     return;
   }
 
+  if (this->currentMode == FxMode::MASTER) {
+    return;
+  }
+
   if (arduboy->reset()) {
     Serial.println("[success] Arduboy reset successfully");
   } else {
@@ -157,6 +164,8 @@ void FxManager::printInfo() {
     Serial.println("[error] FxManager not initialized");
     return;
   }
+
+  this->setMode(FxMode::PROGRAMMING);
 
   if (arduboy) {
     arduboy->printDeviceInfo();
@@ -172,4 +181,20 @@ void FxManager::printInfo() {
   } else {
     Serial.println("[error] OLEDController not initialized");
   }
+}
+
+void FxManager::triStateSPIPins() {
+  // Set SPI pins to INPUT (high-impedance) to avoid interference
+  SPI.end();  // End SPI if active
+  pinMode(SCK, INPUT);
+  pinMode(MOSI, INPUT);
+  pinMode(MISO, INPUT);
+}
+
+void FxManager::activateSPIPins() {
+  // Set SPI pins to OUTPUT for active communication
+  pinMode(SCK, OUTPUT);
+  pinMode(MOSI, OUTPUT);
+  pinMode(MISO, INPUT);
+  SPI.begin();  // MISO is always input
 }

@@ -37,28 +37,27 @@ private:
     void showProgress(uint32_t current, uint32_t total, const char* operation);
     uint8_t spiTransaction(uint8_t a, uint8_t b, uint8_t c, uint8_t d);
 
-public:
- ISPProgrammer(uint8_t reset_pin);
- ~ISPProgrammer();
+   public:
+    ISPProgrammer(uint8_t reset_pin);
+    ~ISPProgrammer();
+    bool begin();
+    void end();
 
- bool begin();
- void end();
+    bool enterProgrammingMode();
+    bool exitProgrammingMode();
 
- bool enterProgrammingMode();
- bool exitProgrammingMode();
+    bool programFlash(const uint8_t* data, uint32_t size);
+    bool eraseChip();
 
- bool programFlash(const uint8_t* data, uint32_t size);
- bool eraseChip();
+    DeviceInfo getDeviceInfo() const { return current_device; }
+    bool isDeviceDetected() const { return device_detected; }
 
- DeviceInfo getDeviceInfo() const { return current_device; }
- bool isDeviceDetected() const { return device_detected; }
+    void printDeviceInfo() const;
+    void printFuses();
 
- void printDeviceInfo() const;
- void printFuses();
-
- // Static device info
- static DeviceInfo getATmega32U4Info();
- static DeviceInfo getATmega328PInfo();
+    // Static device info
+    static DeviceInfo getATmega32U4Info();
+    static DeviceInfo getATmega328PInfo();
 };
 
 #endif // ISP_PROGRAMMER_H

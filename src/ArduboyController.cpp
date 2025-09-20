@@ -23,6 +23,8 @@ bool ArduboyController::begin() {
     return true;
   }
 
+  pinMode(ISP_RESET_PIN, OUTPUT);
+
   // Initialize HEX parser
   hexParser = new HexParser(HEX_BUFFER_SIZE);
   if (!hexParser) {
@@ -38,8 +40,6 @@ bool ArduboyController::begin() {
     hexParser = nullptr;
     return false;
   }
-
-  digitalWrite(ISP_RESET_PIN, LOW); // avr should be powered on initially
 
   initialized = true;
   return true;
@@ -174,9 +174,6 @@ void ArduboyController::printDeviceInfo() {
 bool ArduboyController::powerOn() {
   Serial.println("Powering on Arduboy...");
 
-  // Set power control pin as output and enable power
-  // pinMode(POWER_CONTROL_PIN, OUTPUT);
-  // digitalWrite(POWER_CONTROL_PIN, HIGH);
   digitalWrite(ISP_RESET_PIN, HIGH);
 
   // Give some time for power to stabilize
@@ -189,8 +186,6 @@ bool ArduboyController::powerOn() {
 bool ArduboyController::powerOff() {
   Serial.println("Powering off Arduboy...");
 
-  // Disable power
-  // digitalWrite(POWER_CONTROL_PIN, LOW);
   digitalWrite(ISP_RESET_PIN, LOW);
 
   Serial.println("Arduboy powered off");

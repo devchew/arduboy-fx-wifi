@@ -24,8 +24,6 @@ bool ISPProgrammer::begin() {
   // Setup reset pin
   pinMode(reset_pin, OUTPUT);
 
-  // Initialize SPI bus (safe to call multiple times)
-  SPI.begin();
 
   // Reset target
   digitalWrite(reset_pin, HIGH);
@@ -37,7 +35,7 @@ bool ISPProgrammer::begin() {
 }
 
 void ISPProgrammer::end() {
-  // Note: SPI.end() is not called here to avoid disrupting other SPI devices
+  // Note: SPI.end() is called in spiTransaction, not here
   digitalWrite(reset_pin, HIGH);  // Release reset
   device_detected = false;
 }
@@ -49,6 +47,9 @@ bool ISPProgrammer::enterProgrammingMode() {
 
   // Try to sync with target - send programming enable command
   for (int attempts = 0; attempts < 32; attempts++) {
+    // Activate SPI for this transaction
+    SPI.begin();
+
     SPI.beginTransaction(spiSettings);
     SPI.transfer(0xAC);
     SPI.transfer(0x53);
@@ -56,12 +57,15 @@ bool ISPProgrammer::enterProgrammingMode() {
     SPI.transfer(0x00);
     SPI.endTransaction();
 
+    // End SPI and tri-state pins
+    SPI.end();
+
     if (response == 0x53) {
       Serial.println("Programming mode enabled");
       return detectDevice();
     }
 
-    // Pulse SCK and try again
+    // Pulse SCK and try again (need to activate pins for this)
     digitalWrite(SCK, HIGH);
     delayMicroseconds(10);
     digitalWrite(SCK, LOW);
@@ -80,12 +84,19 @@ bool ISPProgrammer::exitProgrammingMode() {
 
 uint8_t ISPProgrammer::spiTransaction(uint8_t a, uint8_t b, uint8_t c,
                                       uint8_t d) {
+  // Activate SPI pins for communication
+  SPI.begin();
+
   SPI.beginTransaction(spiSettings);
   SPI.transfer(a);
   SPI.transfer(b);
   SPI.transfer(c);
   uint8_t result = SPI.transfer(d);
   SPI.endTransaction();
+
+  // End SPI and tri-state pins to avoid interference
+  SPI.end();
+
   return result;
 }
 

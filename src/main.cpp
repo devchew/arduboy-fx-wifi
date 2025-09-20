@@ -65,6 +65,10 @@ void setup() {
     Serial.println("Failed to initialize Serial CLI!");
     return;
   }
+
+  delay(100);
+
+  fxManager->setMode(FxMode::MASTER);
 }
 
 void loop() {
@@ -74,5 +78,4 @@ void loop() {
   if (fxManager) {
     fxManager->update();
   }
-  delay(10);
 }

@@ -2,6 +2,7 @@
 #define FX_MANAGER_H
 
 #include <Arduino.h>
+#include <SPI.h>
 
 #include "ArduboyController.h"
 #include "FileSystemManager.h"
@@ -32,6 +33,9 @@ class FxManager {
   ArduboyController* arduboy;
   FileSystemManager* fileSystem;
   OLEDController* oled;
+
+  void triStateSPIPins();
+  void activateSPIPins();
 };
 
 #endif  // FX_MANAGER_H

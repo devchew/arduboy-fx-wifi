@@ -19,14 +19,6 @@ bool OLEDController::begin() {
   // Setup pins
   pinMode(OLED_CS_PIN, OUTPUT);
 
-  // Set initial pin states
-  digitalWrite(OLED_CS_PIN, LOW);  // CS inactive
-  // Initialize the displayo
-  u8x8.begin();
-  u8x8.setPowerSave(0);
-  u8x8.setFlipMode(0);
-  u8x8.setContrast(128);
-  u8x8.clearDisplay();
 
   initialized = true;
   Serial.println("OLED Controller initialized successfully");
@@ -94,6 +86,11 @@ bool OLEDController::master() {
 
   isMaster = true;
 
+  // Initialize the displayo
+  u8x8.begin();
+  u8x8.setPowerSave(0);
+  u8x8.setFlipMode(0);
+  u8x8.setContrast(128);
   u8x8.clearDisplay();
   u8x8.setPowerSave(0);  // Turn on display
   Serial.println("OLED set to MASTER mode");
@@ -103,11 +100,6 @@ bool OLEDController::master() {
 bool OLEDController::enable() {
   if (!initialized) {
     Serial.println("OLED Controller not initialized");
-    return false;
-  }
-
-  if (!isMaster) {
-    Serial.println("OLED must be in MASTER mode to enable");
     return false;
   }
 
@@ -122,10 +114,6 @@ bool OLEDController::disable() {
     return false;
   }
 
-  if (!isMaster) {
-    Serial.println("OLED must be in MASTER mode to enable");
-    return false;
-  }
 
   digitalWrite(OLED_CS_PIN, HIGH);  // Deselect OLED
   Serial.println("OLED disabled");
