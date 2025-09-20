@@ -40,7 +40,7 @@ bool ArduboyController::begin() {
     return false;
   }
 
-  digitalWrite(ISP_RESET_PIN, LOW); // Ensure reset pin is low
+  digitalWrite(ISP_RESET_PIN, LOW); // avr should be powered on initially
 
   initialized = true;
   return true;
@@ -137,24 +137,15 @@ bool ArduboyController::flash(const String& filename) {
 }
 
 bool ArduboyController::reset() {
-  if (!initialized || !ispProgrammer) {
-    Serial.println("ArduboyController not initialized");
-    return false;
-  }
-
-  if (!ispProgrammer->begin()) {
-    Serial.println("Failed to initialize ISP programmer");
-    return false;
-  }
 
   // Trigger reset by toggling reset pin
   Serial.println("Resetting Arduboy...");
 
-  // The reset is handled internally by the ISP programmer
-  // We'll exit programming mode which releases reset
-  ispProgrammer->exitProgrammingMode();
+  this->powerOff();
+  delay(100);
+  this->powerOn();
+  delay(100);
 
-  ispProgrammer->end();
   Serial.println("Reset complete");
   return true;
 }

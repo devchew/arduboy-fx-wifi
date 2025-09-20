@@ -8,6 +8,7 @@ class OLEDController {
  private:
   bool initialized;
   bool isMaster;
+  int currentScreen = 0;
 
   U8X8_SSD1309_128X64_NONAME0_4W_HW_SPI u8x8;
 
@@ -30,6 +31,10 @@ class OLEDController {
   bool disable();
 
   void helloWorld();
+
+    void clear();
+
+  void loop();
 };
 
 #endif  // OLED_CONTROLLER_H

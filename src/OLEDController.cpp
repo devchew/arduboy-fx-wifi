@@ -17,11 +17,11 @@ bool OLEDController::begin() {
   }
 
   // Setup pins
-  pinMode(OLED_CS_PIN, INPUT);
+  pinMode(OLED_CS_PIN, OUTPUT);
 
   // Set initial pin states
-  digitalWrite(OLED_CS_PIN, HIGH);  // CS inactive
-  // Initialize the display
+  digitalWrite(OLED_CS_PIN, LOW);  // CS inactive
+  // Initialize the displayo
   u8x8.begin();
   u8x8.setPowerSave(0);
   u8x8.setFlipMode(0);
@@ -53,9 +53,9 @@ bool OLEDController::reset() {
     return false;
   }
 
-  OLEDController.disable();
+  this->disable();
   delay(10);
-  OLEDController.enable();
+  this->enable();
   delay(10);
 
   Serial.println("OLED reset completed");
@@ -75,7 +75,9 @@ bool OLEDController::slave() {
 
   isMaster = false;
 
-  pinMode(OLED_CS_PIN, INPUT);
+  u8x8.clearDisplay();
+  u8x8.setPowerSave(1);  // Turn off display
+  currentScreen = 0;
   Serial.println("OLED set to SLAVE mode");
   return true;
 }
@@ -93,8 +95,9 @@ bool OLEDController::master() {
 
   isMaster = true;
 
-  pinMode(OLED_CS_PIN, OUTPUT);
-  digitalWrite(OLED_CS_PIN, LOW);
+  u8x8.clearDisplay();
+  u8x8.setPowerSave(0);  // Turn on display
+  currentScreen = 0;
   Serial.println("OLED set to MASTER mode");
   return true;
 }
@@ -142,11 +145,27 @@ void OLEDController::helloWorld() {
     return;
   }
 
-  delay(1);
-  u8x8.clearDisplay();
-  u8x8.setFont(u8x8_font_chroma48medium8_r);
-  u8x8.drawString(0, 1, "Hello esp!");
-  u8x8.drawString(0, 3, "Arduboy FX");
+  currentScreen = 1;
+}
 
-  Serial.println("OLED Hello World displayed");
+void OLEDController::clear() {
+  if (!initialized || !isMaster) {
+    return;
+  }
+
+  u8x8.clearDisplay();
+  currentScreen = 0;
+}
+
+void OLEDController::loop() {
+  if (!initialized || !isMaster) {
+    return;
+  }
+
+  if (currentScreen == 1) {
+    u8x8.clearDisplay();
+    u8x8.setFont(u8x8_font_chroma48medium8_r);
+    u8x8.drawString(0, 1, "Hello esp!");
+    u8x8.drawString(0, 3, "Arduboy FX");
+  }
 }

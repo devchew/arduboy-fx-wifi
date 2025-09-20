@@ -5,19 +5,16 @@
 #include <WiFi.h>
 #endif
 
-#include "ArduboyController.h"
-#include "FileSystemManager.h"
-#include "OLEDController.h"
+#include "FxManager.h"
 #include "SerialCLI.h"
 #include "config.h"
 
 // ==========================================
 // GLOBAL OBJECTS
 // ==========================================
-ArduboyController* arduboy = nullptr;
-FileSystemManager* fileSystem = nullptr;
+
 SerialCLI* cli = nullptr;
-OLEDController* oled = nullptr;
+FxManager* fxManager = nullptr;
 
 // ==========================================
 // UTILITY FUNCTIONS
@@ -53,48 +50,21 @@ void initializeWiFi() {
 void setup() {
   Serial.begin(SERIAL_BAUD_RATE);
 
-  Serial.println();
-  Serial.println("Initializing Arduboy FX WiFi Programmer...");
-
-  // Initialize FileSystem
-  fileSystem = new FileSystemManager();
-  if (!fileSystem || !fileSystem->begin()) {
-    Serial.println("Failed to initialize filesystem!");
-    return;
-  }
-
   // Initialize WiFi (optional)
   initializeWiFi();
 
-  // Initialize ArduboyController
-  arduboy = new ArduboyController();
-  if (!arduboy || !arduboy->begin()) {
-    Serial.println("Failed to initialize ArduboyController!");
-    return;
-  }
-
-  // Initialize OLEDController
-  oled = new OLEDController();
-  if (!oled || !oled->begin()) {
-    Serial.println("Failed to initialize OLEDController!");
+  fxManager = new FxManager();
+  if (!fxManager || !fxManager->begin()) {
+    Serial.println("Failed to initialize FxManager!");
     return;
   }
 
   // Initialize SerialCLI
-  cli = new SerialCLI();
-  if (!cli || !cli->begin(arduboy, fileSystem, oled)) {
+  cli = new SerialCLI(fxManager);
+  if (!cli) {
     Serial.println("Failed to initialize Serial CLI!");
     return;
   }
-
-  delay(100);
-  
-  arduboy->powerOff();
-  oled->master();
-  oled->helloWorld();
-
-  
-
 }
 
 void loop() {
