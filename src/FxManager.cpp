@@ -73,11 +73,15 @@ void FxManager::setMode(FxMode mode) {
       Serial.println("Switched to MASTER mode");
       break;
     case FxMode::PROGRAMMING:
-      arduboy->powerOn();
-      this->activateSPIPins();
       oled->clear();
       oled->disable();
       oled->slave();
+      delay(10);
+      this->triStateSPIPins();
+      this->activateSPIPins();
+
+      arduboy->powerOn();
+      delay(50);  // allow bus and target to settle before probing
       Serial.println("Switched to PROGRAMMING mode");
       break;
   }
@@ -167,6 +171,8 @@ void FxManager::printInfo() {
 
   this->setMode(FxMode::PROGRAMMING);
 
+  delay(50);
+
   if (arduboy) {
     arduboy->printDeviceInfo();
   } else {
@@ -181,6 +187,8 @@ void FxManager::printInfo() {
   } else {
     Serial.println("[error] OLEDController not initialized");
   }
+
+  this->setMode(FxMode::MASTER);
 }
 
 void FxManager::triStateSPIPins() {
@@ -188,13 +196,18 @@ void FxManager::triStateSPIPins() {
   SPI.end();  // End SPI if active
   pinMode(SCK, INPUT);
   pinMode(MOSI, INPUT);
-  pinMode(MISO, INPUT);
+  pinMode(MISO, INPUT_PULLUP);  // keep line stable
+  // ensure hardware SS is tri-stated / not driving bus
+  pinMode(SS, INPUT);
 }
-
+// ...existing code...
 void FxManager::activateSPIPins() {
   // Set SPI pins to OUTPUT for active communication
   pinMode(SCK, OUTPUT);
   pinMode(MOSI, OUTPUT);
-  pinMode(MISO, INPUT);
-  SPI.begin();  // MISO is always input
+  pinMode(MISO, INPUT);  // host reads MISO
+  // configure SS for AVR slave select and set idle HIGH
+  pinMode(SS, OUTPUT);
+  digitalWrite(SS, HIGH);
+  SPI.begin();
 }
