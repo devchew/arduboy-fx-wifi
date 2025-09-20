@@ -28,9 +28,7 @@ struct DeviceInfo {
 class ISPProgrammer {
 private:
     uint8_t reset_pin;
-    uint8_t sck_pin;
-    uint8_t mosi_pin;
-    uint8_t miso_pin;
+    SPISettings spiSettings;
     DeviceInfo current_device;
     bool device_detected;
     
@@ -40,27 +38,27 @@ private:
     uint8_t spiTransaction(uint8_t a, uint8_t b, uint8_t c, uint8_t d);
 
 public:
-    ISPProgrammer(uint8_t reset_pin, uint8_t sck_pin, uint8_t mosi_pin, uint8_t miso_pin);
-    ~ISPProgrammer();
-    
-    bool begin();
-    void end();
-    
-    bool enterProgrammingMode();
-    bool exitProgrammingMode();
-    
-    bool programFlash(const uint8_t* data, uint32_t size);
-    bool eraseChip();
-    
-    DeviceInfo getDeviceInfo() const { return current_device; }
-    bool isDeviceDetected() const { return device_detected; }
-    
-    void printDeviceInfo() const;
-    void printFuses();
-    
-    // Static device info
-    static DeviceInfo getATmega32U4Info();
-    static DeviceInfo getATmega328PInfo();
+ ISPProgrammer(uint8_t reset_pin);
+ ~ISPProgrammer();
+
+ bool begin();
+ void end();
+
+ bool enterProgrammingMode();
+ bool exitProgrammingMode();
+
+ bool programFlash(const uint8_t* data, uint32_t size);
+ bool eraseChip();
+
+ DeviceInfo getDeviceInfo() const { return current_device; }
+ bool isDeviceDetected() const { return device_detected; }
+
+ void printDeviceInfo() const;
+ void printFuses();
+
+ // Static device info
+ static DeviceInfo getATmega32U4Info();
+ static DeviceInfo getATmega328PInfo();
 };
 
 #endif // ISP_PROGRAMMER_H

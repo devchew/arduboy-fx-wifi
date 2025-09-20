@@ -31,8 +31,7 @@ bool ArduboyController::begin() {
   }
 
   // Initialize ISP programmer (using default hardware SPI pins)
-  ispProgrammer =
-      new ISPProgrammer(ISP_RESET_PIN, SCK, MOSI, MISO);
+  ispProgrammer = new ISPProgrammer(ISP_RESET_PIN);
   if (!ispProgrammer) {
     Serial.println("Failed to create ISP programmer");
     delete hexParser;

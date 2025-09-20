@@ -24,11 +24,11 @@ bool FxManager::begin() {
   // todo: SPI line sharing with oled fight each other
 
   // Initialize ArduboyController
-  //   arduboy = new ArduboyController();
-  //   if (!arduboy || !arduboy->begin()) {
-  //     Serial.println("Failed to initialize ArduboyController!");
-  //     return false;
-  //   }
+  arduboy = new ArduboyController();
+  if (!arduboy || !arduboy->begin()) {
+    Serial.println("Failed to initialize ArduboyController!");
+    return false;
+  }
 
   // Initialize OLEDController
   oled = new OLEDController();
@@ -59,19 +59,19 @@ void FxManager::setMode(FxMode mode) {
     case FxMode::GAME:
       oled->enable();
       oled->slave();
-      //   arduboy->powerOn();
+      arduboy->powerOn();
 
       Serial.println("Switched to GAME mode");
       break;
     case FxMode::MASTER:
-      //   arduboy->powerOff();
+      arduboy->powerOff();
       oled->enable();
       oled->master();
       oled->helloWorld();
       Serial.println("Switched to MASTER mode");
       break;
     case FxMode::PROGRAMMING:
-      //   arduboy->powerOn();
+      arduboy->powerOn();
       oled->clear();
       oled->disable();
       oled->slave();

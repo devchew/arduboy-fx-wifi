@@ -2,12 +2,10 @@
 
 #include <SPI.h>
 
-ISPProgrammer::ISPProgrammer(uint8_t reset_pin, uint8_t sck_pin,
-                             uint8_t mosi_pin, uint8_t miso_pin) {
+ISPProgrammer::ISPProgrammer(uint8_t reset_pin) {
   this->reset_pin = reset_pin;
-  this->sck_pin = sck_pin;
-  this->mosi_pin = mosi_pin;
-  this->miso_pin = miso_pin;
+  // Initialize SPI settings for ISP programming (100kHz, MODE0, MSBFIRST)
+  spiSettings = SPISettings(100000, MSBFIRST, SPI_MODE0);
   device_detected = false;
 
   // Initialize current_device properly
@@ -23,17 +21,11 @@ ISPProgrammer::ISPProgrammer(uint8_t reset_pin, uint8_t sck_pin,
 ISPProgrammer::~ISPProgrammer() { end(); }
 
 bool ISPProgrammer::begin() {
-  // Setup pins
+  // Setup reset pin
   pinMode(reset_pin, OUTPUT);
-  pinMode(sck_pin, OUTPUT);
-  pinMode(mosi_pin, OUTPUT);
-  pinMode(miso_pin, INPUT);
 
-  // Initialize SPI
+  // Initialize SPI bus (safe to call multiple times)
   SPI.begin();
-  SPI.setFrequency(100000);  // 100kHz for programming
-  SPI.setDataMode(SPI_MODE0);
-  SPI.setBitOrder(MSBFIRST);
 
   // Reset target
   digitalWrite(reset_pin, HIGH);
@@ -45,7 +37,7 @@ bool ISPProgrammer::begin() {
 }
 
 void ISPProgrammer::end() {
-  SPI.end();
+  // Note: SPI.end() is not called here to avoid disrupting other SPI devices
   digitalWrite(reset_pin, HIGH);  // Release reset
   device_detected = false;
 }
@@ -57,10 +49,12 @@ bool ISPProgrammer::enterProgrammingMode() {
 
   // Try to sync with target - send programming enable command
   for (int attempts = 0; attempts < 32; attempts++) {
+    SPI.beginTransaction(spiSettings);
     SPI.transfer(0xAC);
     SPI.transfer(0x53);
     uint8_t response = SPI.transfer(0x00);
     SPI.transfer(0x00);
+    SPI.endTransaction();
 
     if (response == 0x53) {
       Serial.println("Programming mode enabled");
@@ -68,9 +62,9 @@ bool ISPProgrammer::enterProgrammingMode() {
     }
 
     // Pulse SCK and try again
-    digitalWrite(sck_pin, HIGH);
+    digitalWrite(SCK, HIGH);
     delayMicroseconds(10);
-    digitalWrite(sck_pin, LOW);
+    digitalWrite(SCK, LOW);
     delayMicroseconds(10);
   }
 
@@ -86,10 +80,13 @@ bool ISPProgrammer::exitProgrammingMode() {
 
 uint8_t ISPProgrammer::spiTransaction(uint8_t a, uint8_t b, uint8_t c,
                                       uint8_t d) {
+  SPI.beginTransaction(spiSettings);
   SPI.transfer(a);
   SPI.transfer(b);
   SPI.transfer(c);
-  return SPI.transfer(d);
+  uint8_t result = SPI.transfer(d);
+  SPI.endTransaction();
+  return result;
 }
 
 bool ISPProgrammer::detectDevice() {
