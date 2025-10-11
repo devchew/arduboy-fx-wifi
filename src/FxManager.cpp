@@ -57,9 +57,9 @@ void FxManager::setMode(FxMode mode) {
 
   switch (mode) {
     case FxMode::GAME:
-      this->triStateSPIPins();
-      oled->enable();
       oled->slave();
+      this->triStateSPIPins();
+      delay(10);
       arduboy->powerOn();
 
       Serial.println("Switched to GAME mode");
@@ -67,8 +67,10 @@ void FxManager::setMode(FxMode mode) {
     case FxMode::MASTER:
       arduboy->powerOff();
       this->activateSPIPins();
+      delay(10);
       oled->enable();
       oled->master();
+      delay(10);
       oled->helloWorld();
       Serial.println("Switched to MASTER mode");
       break;
@@ -196,7 +198,7 @@ void FxManager::triStateSPIPins() {
   SPI.end();  // End SPI if active
   pinMode(SCK, INPUT);
   pinMode(MOSI, INPUT);
-  pinMode(MISO, INPUT_PULLUP);  // keep line stable
+  pinMode(MISO, INPUT);  // keep line stable
   // ensure hardware SS is tri-stated / not driving bus
   pinMode(SS, INPUT);
 }

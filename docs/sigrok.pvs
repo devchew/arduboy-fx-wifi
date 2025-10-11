@@ -1,3 +1,9 @@
+[General]
+decode_signals=0
+generated_signals=0
+views=1
+meta_objs=0
+
 [D0]
 name=MOSI
 enabled=true
@@ -6,36 +12,36 @@ conversion_type=0
 conv_options=0
 
 [D1]
-name=MISO
+name=SDA
 enabled=true
 color=4287582722
 conversion_type=0
 conv_options=0
 
 [D2]
-name=SCL
+name=CLK
 enabled=true
 color=4291559424
 conversion_type=0
 conv_options=0
 
 [D3]
-name=RST
+name=AVR_RESET
 enabled=true
 color=4294277376
 conversion_type=0
 conv_options=0
 
 [D4]
-name=RST
+name=OLED_CS
 enabled=false
 color=4293776384
 conversion_type=0
 conv_options=0
 
 [D5]
-name=D5
-enabled=false
+name=OLED CS
+enabled=true
 color=4285780502
 conversion_type=0
 conv_options=0
@@ -110,18 +116,12 @@ color=4285780502
 conversion_type=0
 conv_options=0
 
-[General]
-decode_signals=0
-generated_signals=0
-views=1
-meta_objs=0
-
 [view0]
-scale=4.850358850768099e-7
-v_offset=-225
-splitter_state=@ByteArray(\0\0\0\xff\0\0\0\x1\0\0\0\x2\0\0\0R\0\0\a'\x1\0\0\0\x1\x1\0\0\0\x1\0)
+scale=0.0068478555304740405
+v_offset=-60
+splitter_state=@ByteArray(\0\0\0\xff\0\0\0\x1\0\0\0\x2\0\0\0x\0\0\a\x1\x1\0\0\0\x1\x1\0\0\0\x1\0)
 segment_display_mode=1
-offset=22 serialization::archive 14 0 0 0 0 253961 8336 56004807 40420551 50924226 65743960 -8 0 0 6
+offset=22 serialization::archive 14 0 0 0 0 0 0 0 0 0 0 0 0 0 6
 zero_offset=22 serialization::archive 14 0 0 0 0 0 0 0 0 0 0 0 0 0 6
 D0\trace_height=32
 D1\trace_height=32

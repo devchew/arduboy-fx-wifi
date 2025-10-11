@@ -4,7 +4,7 @@
 
 OLEDController::OLEDController()
     : initialized(false),
-      isMaster(true),
+      isMaster(false),
       u8x8(U8X8_SSD1309_128X64_NONAME0_4W_HW_SPI(/* cs=*/U8X8_PIN_NONE,
                                                  /* dc=*/OLED_DC_PIN,
                                                  /* reset=*/OLED_RESET_PIN)) {}
@@ -18,7 +18,16 @@ bool OLEDController::begin() {
 
   // Setup pins
   pinMode(OLED_CS_PIN, OUTPUT);
+  // pinMode(OLED_DC_PIN, OUTPUT);
+  // pinMode(OLED_RESET_PIN, OUTPUT);
 
+  // // Initialize default SPI (U8g2 will use it automatically)
+  // SPI.begin();
+
+  // // Initialize U8x8 display (uses default SPI pins)
+  // u8x8.begin();
+  // u8x8.setPowerSave(0);
+  // u8x8.setFlipMode(0);
 
   initialized = true;
   Serial.println("OLED Controller initialized successfully");
@@ -79,21 +88,16 @@ bool OLEDController::master() {
     return false;
   }
 
-  if (isMaster) {
-    Serial.println("OLED already in MASTER mode");
-    return true;
-  }
-
-  isMaster = true;
-
-  // Initialize the displayo
+  // Initialize the display
   u8x8.begin();
+  u8x8.setBusClock(1000000);  // 1MHz
   u8x8.setPowerSave(0);
   u8x8.setFlipMode(0);
   u8x8.setContrast(128);
   u8x8.clearDisplay();
   u8x8.setPowerSave(0);  // Turn on display
-  Serial.println("OLED set to MASTER mode");
+
+  isMaster = true;
   return true;
 }
 
@@ -149,4 +153,7 @@ void OLEDController::loop() {
   if (!initialized || !isMaster) {
     return;
   }
+  // if (millis() % 1000 == 0) {
+  //   helloWorld();
+  // }
 }

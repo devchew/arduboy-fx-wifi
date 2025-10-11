@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include <FS.h>
 #include <LittleFS.h>
-
+#include "config.h"
 class FileSystemManager {
 private:
   bool initialized;

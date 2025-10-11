@@ -13,8 +13,11 @@ extern "C" ihex_bool_t ihex_data_read(struct ihex_state* ihex,
   return HexParser::ihex_data_callback(ihex, type, checksum_error);
 }
 
-ArduboyController::ArduboyController()
-    : hexParser(nullptr), ispProgrammer(nullptr), initialized(false) {}
+ArduboyController::ArduboyController() {
+  hexParser = nullptr;
+  ispProgrammer = nullptr;
+  initialized = false;
+}
 
 ArduboyController::~ArduboyController() { end(); }
 
@@ -136,7 +139,6 @@ bool ArduboyController::flash(const String& filename) {
 }
 
 bool ArduboyController::reset() {
-
   // Trigger reset by toggling reset pin
   Serial.println("Resetting Arduboy...");
 
@@ -178,7 +180,7 @@ bool ArduboyController::powerOn() {
 
   // Give some time for power to stabilize
   delay(100);
-  
+
   Serial.println("Arduboy powered on");
   return true;
 }

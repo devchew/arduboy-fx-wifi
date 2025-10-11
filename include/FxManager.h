@@ -7,6 +7,7 @@
 #include "ArduboyController.h"
 #include "FileSystemManager.h"
 #include "OLEDController.h"
+#include "config.h"
 
 enum class FxMode { GAME, MASTER, PROGRAMMING };
 
@@ -26,6 +27,9 @@ class FxManager {
   void listGames();
   void reset();
   void printInfo();
+
+  // Accessor methods
+  FileSystemManager* getFileSystemManager() const { return fileSystem; }
 
  private:
   bool initialized;

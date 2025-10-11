@@ -5,6 +5,7 @@
 
 #include "HexParser.h"
 #include "ISPProgrammer.h"
+#include "config.h"
 
 class ArduboyController {
  private:

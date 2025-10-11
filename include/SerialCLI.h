@@ -4,6 +4,7 @@
 #include <Arduino.h>
 
 #include "FxManager.h"
+#include "config.h"
 
 class FxManager;
 
@@ -18,4 +19,4 @@ public:
  void update();
 };
 
-#endif // SERIALCLI_H
+#endif  // SERIALCLI_H

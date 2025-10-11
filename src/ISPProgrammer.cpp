@@ -22,7 +22,7 @@ bool ISPProgrammer::begin() {
   // Setup pins
   pinMode(reset_pin, OUTPUT);
 
-  // Initialize SPI
+  // Initialize default SPI (shared with OLED)
   SPI.begin();
   SPI.setFrequency(100000);  // 100kHz for programming
   SPI.setDataMode(SPI_MODE0);
@@ -111,7 +111,7 @@ bool ISPProgrammer::detectDevice() {
     current_device.uses_word_addressing = true;  // Default
     device_detected = false;
     Serial.printf("Warning: Unknown device signature: 0x%02X 0x%02X 0x%02X\n",
-                  sig[0], sig[1], sig[2]);
+                   sig[0], sig[1], sig[2]);
   }
 
   return device_detected;
@@ -252,15 +252,15 @@ void ISPProgrammer::showProgress(uint32_t current, uint32_t total,
 
 void ISPProgrammer::printDeviceInfo() const {
   Serial.printf("Device signature: 0x%02X 0x%02X 0x%02X\n",
-                current_device.signature[0], current_device.signature[1],
-                current_device.signature[2]);
+                 current_device.signature[0], current_device.signature[1],
+                 current_device.signature[2]);
   Serial.printf("Device: %s\n", current_device.name.c_str());
 
   if (device_detected) {
     Serial.printf("Page size: %d bytes\n", current_device.page_size);
     Serial.printf("Flash size: %d bytes\n", current_device.flash_size);
     Serial.printf("Addressing: %s\n",
-                  current_device.uses_word_addressing ? "Word" : "Byte");
+                   current_device.uses_word_addressing ? "Word" : "Byte");
   }
 }
 
@@ -276,7 +276,7 @@ void ISPProgrammer::printFuses() {
   uint8_t efuse = spiTransaction(0x50, 0x08, 0x00, 0x00);
 
   Serial.printf("Fuses - Low: 0x%02X, High: 0x%02X, Extended: 0x%02X\n", lfuse,
-                hfuse, efuse);
+                 hfuse, efuse);
 }
 
 // Static device info methods

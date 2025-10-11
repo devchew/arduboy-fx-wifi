@@ -67,7 +67,7 @@ bool HexParser::parseFile(const char* filename) {
 
   if (parse_success) {
     Serial.printf("HEX file parsed successfully. Flash size: %d bytes\n",
-                  flash_size);
+                   flash_size);
     printParseInfo();
   }
 

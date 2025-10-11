@@ -2,22 +2,35 @@
 #define CONFIG_H
 
 // ==========================================
+// SERIAL ALIAS CONFIGURATION
+// ==========================================
+// Create alias for Serial to use Serial0 (native USB port on ESP32-S2)
+// #define Serial Serial0
+
+// ==========================================
+// SHARED SPI CONFIGURATION (Default VSPI/SPI3)
+// ==========================================
+// ESP32-S2 Default SPI pins (VSPI/SPI3) - Shared by OLED and Arduboy ISP
+// SCK  = GPIO7  (Default VSPI SCK)
+// MOSI = GPIO11 (Default VSPI MOSI)
+// MISO = GPIO9  (Default VSPI MISO)
+// Note: These are the default pins, no need to define them explicitly
+
+// ==========================================
 // ISP PIN CONFIGURATION
 // ==========================================
-// ISP pin definitions for ESP32-C3 to ATmega32U4 (Arduboy)
-#define ISP_RESET_PIN 3      // GPIO3 (custom pin for reset)
-// Using default ESP32-C3 hardware SPI pins:
-// SCK  = GPIO6 (default)
-// MOSI = GPIO7 (default)
-// MISO = GPIO5 (default)
-
+// ISP pin definitions for ESP32-S2 to ATmega32U4 (Arduboy)
+#define ISP_RESET_PIN 21  // GPIO15 (custom pin for reset)
+// Uses default SPI pins (GPIO7=SCK, GPIO11=MOSI, GPIO9=MISO)
 
 // ==========================================
 // OLED CONFIGURATION
 // ==========================================
-#define OLED_RESET_PIN 2  // GPIO2 (custom pin for OLED reset)
-#define OLED_DC_PIN 1     // GPIO1 (custom pin for OLED DC)
-#define OLED_CS_PIN 0     // GPIO0 (custom pin for OLED CS)
+#define OLED_RESET_PIN 18  // GPIO18 (custom pin for OLED reset)
+#define OLED_DC_PIN 16     // GPIO17 (custom pin for OLED DC)
+#define OLED_CS_PIN 17     // GPIO16 (custom pin for OLED CS)
+// Uses default SPI pins (GPIO7=SCK, GPIO11=MOSI)
+
 
 // ==========================================
 // WIFI CONFIGURATION (Optional)

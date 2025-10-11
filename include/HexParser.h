@@ -5,6 +5,7 @@
 #include <LittleFS.h>
 
 #include "kk_ihex_read.h"
+#include "config.h"
 
 class HexParser {
  private:
