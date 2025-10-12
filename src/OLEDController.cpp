@@ -16,19 +16,15 @@ bool OLEDController::begin() {
     return true;
   }
 
-  // Setup pins
+  // Setup pins - initialize as OUTPUT but don't drive them yet
   pinMode(OLED_CS_PIN, OUTPUT);
-  // pinMode(OLED_DC_PIN, OUTPUT);
-  // pinMode(OLED_RESET_PIN, OUTPUT);
+  pinMode(OLED_DC_PIN, OUTPUT);
+  pinMode(OLED_RESET_PIN, OUTPUT);
 
-  // // Initialize default SPI (U8g2 will use it automatically)
-  // SPI.begin();
+  // Set safe initial states
+  digitalWrite(OLED_CS_PIN, HIGH);  // Deselect OLED
 
-  // // Initialize U8x8 display (uses default SPI pins)
-  // u8x8.begin();
-  // u8x8.setPowerSave(0);
-  // u8x8.setFlipMode(0);
-
+  // Don't initialize display yet - wait for master() call
   initialized = true;
   Serial.println("OLED Controller initialized successfully");
   return true;
@@ -38,7 +34,7 @@ void OLEDController::end() {
   if (initialized) {
     // Set pins to safe state
     u8x8.setPowerSave(1);  // Turn off display
-
+    
     initialized = false;
     isMaster = false;
   }
@@ -78,7 +74,12 @@ bool OLEDController::slave() {
 
   u8x8.clearDisplay();
   u8x8.setPowerSave(1);  // Turn off display
-  Serial.println("OLED set to SLAVE mode");
+
+  // Release control pins to allow AVR to control OLED
+  pinMode(OLED_DC_PIN, INPUT);     // High-impedance DC
+  pinMode(OLED_RESET_PIN, INPUT);  // High-impedance RESET
+
+  Serial.println("OLED set to SLAVE mode - control pins released");
   return true;
 }
 
@@ -87,6 +88,13 @@ bool OLEDController::master() {
     Serial.println("OLED Controller not initialized");
     return false;
   }
+
+  // Reclaim control pins
+  pinMode(OLED_DC_PIN, OUTPUT);
+  pinMode(OLED_RESET_PIN, OUTPUT);
+
+  // Set safe initial states
+  digitalWrite(OLED_CS_PIN, HIGH);  // Deselect OLED initially
 
   // Initialize the display
   u8x8.begin();
@@ -98,6 +106,7 @@ bool OLEDController::master() {
   u8x8.setPowerSave(0);  // Turn on display
 
   isMaster = true;
+  Serial.println("OLED set to MASTER mode - control pins reclaimed");
   return true;
 }
 

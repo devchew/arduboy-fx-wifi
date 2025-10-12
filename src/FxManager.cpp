@@ -57,27 +57,43 @@ void FxManager::setMode(FxMode mode) {
 
   switch (mode) {
     case FxMode::GAME:
+      // First put OLED into slave mode (releases control pins)
       oled->slave();
+      oled->enable();
+      delay(50);  // Give time for OLED to enter sleep and release pins
+
+      // Then tri-state SPI pins to let AVR take control
       this->triStateSPIPins();
-      delay(10);
+      delay(20);  // Give time for pin state changes
+
+      // Finally power on AVR
       arduboy->powerOn();
 
       Serial.println("Switched to GAME mode");
       break;
     case FxMode::MASTER:
+      // First power off AVR to prevent conflicts
       arduboy->powerOff();
+      delay(50);  // Give time for AVR to power down completely
+
+      // Reactivate SPI for ESP control
+      this->triStateSPIPins();
       this->activateSPIPins();
-      delay(10);
-      oled->enable();
+      delay(20);  // Give time for SPI reactivation
+
       oled->master();
-      delay(10);
+      // Enable and configure OLED in master mode
+      oled->enable();
+      delay(50);  // Give extra time for display initialization
+
       oled->helloWorld();
+
       Serial.println("Switched to MASTER mode");
       break;
     case FxMode::PROGRAMMING:
       oled->clear();
-      oled->disable();
       oled->slave();
+      oled->disable();
       delay(10);
       this->triStateSPIPins();
       this->activateSPIPins();
@@ -132,7 +148,7 @@ void FxManager::flashGame(const String& filename) {
     Serial.println("[error] Flash operation failed");
   }
 
-  setMode(FxMode::MASTER);
+  setMode(FxMode::GAME);
 }
 
 void FxManager::listGames() {
