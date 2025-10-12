@@ -9,6 +9,7 @@ Main goal is to connect the esp to the Arduboy via SPI, and be able to upload ga
 - AVR - proMicro 5V 16MHz
 - ESP32 - Wemos s2 mini
 - 128x64 OLED - SSD1306 (SPI)
+- sd card - microSD breakout board
 
 ## Wiring
 
