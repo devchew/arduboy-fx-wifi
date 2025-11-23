@@ -44,11 +44,6 @@ void initializeWiFi() {
 // ARDUINO SETUP AND LOOP
 // ==========================================
 
-bool lastButtonState = HIGH;
-long lastDebounceTime = 0;
-long debounceDelay = 50;
-bool modeMaster = true;
-
 void setup() {
   Serial.begin(SERIAL_BAUD_RATE);
 
@@ -80,10 +75,6 @@ void setup() {
   // fxManager->setMode(FxMode::MASTER);
 
   Serial.println("Setup complete. Enter commands:");
-
-
-  // quick toggle test button, on pin5 to ground
-  pinMode(5, INPUT_PULLUP);
 }
 
 void loop() {
@@ -93,23 +84,4 @@ void loop() {
   if (fxManager) {
     fxManager->update();
   }
-
-  // quick toggle test button, on pin5 to ground
-  bool reading = digitalRead(5);
-  if (reading != lastButtonState) {
-    lastDebounceTime = millis();
-  }
-
-  if ((millis() - lastDebounceTime) > debounceDelay) {
-    if (reading == LOW) {
-      modeMaster = !modeMaster;
-      if (fxManager) {
-        fxManager->setMode(modeMaster ? FxMode::MASTER : FxMode::GAME);
-        Serial.print("Mode switched to ");
-        Serial.println(modeMaster ? "MASTER" : "GAME");
-      }
-    }
-  }
-
-  lastButtonState = reading;
 }

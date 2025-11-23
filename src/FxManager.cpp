@@ -215,17 +215,12 @@ void FxManager::triStateSPIPins() {
   pinMode(SCK, INPUT);
   pinMode(MOSI, INPUT);
   pinMode(MISO, INPUT);  // keep line stable
-  // ensure hardware SS is tri-stated / not driving bus
-  pinMode(SS, INPUT);
 }
-// ...existing code...
+
 void FxManager::activateSPIPins() {
   // Set SPI pins to OUTPUT for active communication
   pinMode(SCK, OUTPUT);
   pinMode(MOSI, OUTPUT);
   pinMode(MISO, INPUT);  // host reads MISO
-  // configure SS for AVR slave select and set idle HIGH
-  pinMode(SS, OUTPUT);
-  digitalWrite(SS, HIGH);
   SPI.begin();
 }

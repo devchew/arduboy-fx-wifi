@@ -21,8 +21,8 @@ bool OLEDController::begin() {
   pinMode(OLED_DC_PIN, OUTPUT);
   pinMode(OLED_RESET_PIN, OUTPUT);
 
-  // Set safe initial states
-  digitalWrite(OLED_CS_PIN, HIGH);  // Deselect OLED
+  enable();
+  master();
 
   // Don't initialize display yet - wait for master() call
   initialized = true;
@@ -34,7 +34,7 @@ void OLEDController::end() {
   if (initialized) {
     // Set pins to safe state
     u8x8.setPowerSave(1);  // Turn off display
-    
+
     initialized = false;
     isMaster = false;
   }
@@ -93,9 +93,6 @@ bool OLEDController::master() {
   pinMode(OLED_DC_PIN, OUTPUT);
   pinMode(OLED_RESET_PIN, OUTPUT);
 
-  // Set safe initial states
-  digitalWrite(OLED_CS_PIN, HIGH);  // Deselect OLED initially
-
   // Initialize the display
   u8x8.begin();
   u8x8.setBusClock(1000000);  // 1MHz
@@ -126,7 +123,6 @@ bool OLEDController::disable() {
     Serial.println("OLED Controller not initialized");
     return false;
   }
-
 
   digitalWrite(OLED_CS_PIN, HIGH);  // Deselect OLED
   Serial.println("OLED disabled");
