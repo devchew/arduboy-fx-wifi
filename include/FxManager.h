@@ -7,6 +7,8 @@
 #include "ArduboyController.h"
 #include "FileSystemManager.h"
 #include "OLEDController.h"
+#include "UI.h"
+#include "HID.h"
 #include "config.h"
 
 enum class FxMode { GAME, MASTER, PROGRAMMING };
@@ -37,6 +39,8 @@ class FxManager {
   ArduboyController* arduboy;
   FileSystemManager* fileSystem;
   OLEDController* oled;
+  UI* ui;
+  HID* hid;
 
   void triStateSPIPins();
   void activateSPIPins();

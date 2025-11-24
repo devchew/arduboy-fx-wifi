@@ -1,10 +1,14 @@
 #include "FxManager.h"
 
+
 FxManager::FxManager() {
   arduboy = nullptr;
   fileSystem = nullptr;
   oled = nullptr;
+  ui = nullptr;
+  hid = nullptr;
   initialized = false;
+  currentMode = FxMode::MASTER;
 }
 
 FxManager::~FxManager() {
@@ -16,7 +20,7 @@ FxManager::~FxManager() {
 bool FxManager::begin() {
   // Initialize FileSystem
   fileSystem = new FileSystemManager();
-  if (!fileSystem || !fileSystem->begin()) {
+  if (!fileSystem->begin()) {
     Serial.println("Failed to initialize filesystem!");
     return false;
   }
@@ -25,15 +29,27 @@ bool FxManager::begin() {
 
   // Initialize ArduboyController
   arduboy = new ArduboyController();
-  if (!arduboy || !arduboy->begin()) {
+  if (!arduboy->begin()) {
     Serial.println("Failed to initialize ArduboyController!");
+    return false;
+  }
+
+  hid = new HID();
+  if (!hid->begin()) {
+    Serial.println("Failed to initialize HID!");
     return false;
   }
 
   // Initialize OLEDController
   oled = new OLEDController();
-  if (!oled || !oled->begin()) {
+  if (!oled->begin()) {
     Serial.println("Failed to initialize OLEDController!");
+    return false;
+  }
+
+  ui = new UI();
+  if (!ui->begin(oled->u8g2)) {
+    Serial.println("Failed to initialize UI!");
     return false;
   }
 
@@ -44,7 +60,11 @@ bool FxManager::begin() {
 }
 
 void FxManager::update() {
-  if (oled) oled->loop();
+  if (!initialized || currentMode != FxMode::MASTER) {
+    return;
+  }
+  hid->update();
+  ui->update(hid->getButtons());
 }
 
 void FxManager::setMode(FxMode mode) {
@@ -57,6 +77,8 @@ void FxManager::setMode(FxMode mode) {
 
   switch (mode) {
     case FxMode::GAME:
+
+      hid->disable();
       // First put OLED into slave mode (releases control pins)
       oled->slave();
       oled->enable();
@@ -76,6 +98,7 @@ void FxManager::setMode(FxMode mode) {
       arduboy->powerOff();
       delay(50);  // Give time for AVR to power down completely
 
+      hid->enable();
       // Reactivate SPI for ESP control
       this->triStateSPIPins();
       this->activateSPIPins();
@@ -86,11 +109,10 @@ void FxManager::setMode(FxMode mode) {
       oled->enable();
       delay(50);  // Give extra time for display initialization
 
-      oled->helloWorld();
-
       Serial.println("Switched to MASTER mode");
       break;
     case FxMode::PROGRAMMING:
+      hid->disable();
       oled->clear();
       oled->slave();
       oled->disable();

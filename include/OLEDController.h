@@ -11,11 +11,12 @@ class OLEDController {
   bool initialized;
   bool isMaster;
 
-  U8X8_SSD1309_128X64_NONAME0_4W_HW_SPI u8x8;
 
  public:
   OLEDController();
   ~OLEDController();
+
+  U8G2_SSD1309_128X64_NONAME0_1_4W_HW_SPI u8g2;
 
   // Initialization
   bool begin();
@@ -31,11 +32,7 @@ class OLEDController {
   bool enable();
   bool disable();
 
-  void helloWorld();
-
-    void clear();
-
-  void loop();
+  void clear();
 };
 
 #endif  // OLED_CONTROLLER_H

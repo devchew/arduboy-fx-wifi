@@ -1,13 +1,9 @@
 #include "OLEDController.h"
 
-#include "config.h"
-
-OLEDController::OLEDController()
-    : initialized(false),
-      isMaster(false),
-      u8x8(U8X8_SSD1309_128X64_NONAME0_4W_HW_SPI(/* cs=*/U8X8_PIN_NONE,
-                                                 /* dc=*/OLED_DC_PIN,
-                                                 /* reset=*/OLED_RESET_PIN)) {}
+OLEDController::OLEDController() : u8g2(U8G2_SSD1309_128X64_NONAME0_1_4W_HW_SPI(U8G2_R0,
+    /* cs=*/U8X8_PIN_NONE,
+    /* dc=*/OLED_DC_PIN,
+    /* reset=*/OLED_RESET_PIN)), initialized(false), isMaster(false) {}
 
 OLEDController::~OLEDController() { end(); }
 
@@ -33,7 +29,7 @@ bool OLEDController::begin() {
 void OLEDController::end() {
   if (initialized) {
     // Set pins to safe state
-    u8x8.setPowerSave(1);  // Turn off display
+    u8g2.setPowerSave(1);  // Turn off display
 
     initialized = false;
     isMaster = false;
@@ -72,8 +68,8 @@ bool OLEDController::slave() {
 
   isMaster = false;
 
-  u8x8.clearDisplay();
-  u8x8.setPowerSave(1);  // Turn off display
+  u8g2.clearDisplay();
+  u8g2.setPowerSave(1);  // Turn off display
 
   // Release control pins to allow AVR to control OLED
   pinMode(OLED_DC_PIN, INPUT);     // High-impedance DC
@@ -94,13 +90,13 @@ bool OLEDController::master() {
   pinMode(OLED_RESET_PIN, OUTPUT);
 
   // Initialize the display
-  u8x8.begin();
-  u8x8.setBusClock(1000000);  // 1MHz
-  u8x8.setPowerSave(0);
-  u8x8.setFlipMode(0);
-  u8x8.setContrast(128);
-  u8x8.clearDisplay();
-  u8x8.setPowerSave(0);  // Turn on display
+  u8g2.begin();
+  u8g2.setBusClock(1000000);  // 1MHz
+  u8g2.setPowerSave(0);
+  u8g2.setFlipMode(0);
+  u8g2.setContrast(128);
+  u8g2.clearDisplay();
+  u8g2.setPowerSave(0);  // Turn on display
 
   isMaster = true;
   Serial.println("OLED set to MASTER mode - control pins reclaimed");
@@ -129,36 +125,10 @@ bool OLEDController::disable() {
   return true;
 }
 
-void OLEDController::helloWorld() {
-  if (!initialized) {
-    Serial.println("OLED Controller not initialized");
-    return;
-  }
-
-  if (!isMaster) {
-    Serial.println("OLED must be in MASTER mode to display");
-    return;
-  }
-
-  u8x8.clearDisplay();
-  u8x8.setFont(u8x8_font_chroma48medium8_r);
-  u8x8.drawString(0, 1, "Hello esp!");
-  u8x8.drawString(0, 3, "Arduboy FX");
-}
-
 void OLEDController::clear() {
   if (!initialized || !isMaster) {
     return;
   }
 
-  u8x8.clearDisplay();
-}
-
-void OLEDController::loop() {
-  if (!initialized || !isMaster) {
-    return;
-  }
-  // if (millis() % 1000 == 0) {
-  //   helloWorld();
-  // }
+  u8g2.clearDisplay();
 }

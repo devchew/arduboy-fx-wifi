@@ -84,4 +84,5 @@ void loop() {
   if (fxManager) {
     fxManager->update();
   }
+  yield();
 }
