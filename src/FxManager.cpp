@@ -60,11 +60,24 @@ bool FxManager::begin() {
 }
 
 void FxManager::update() {
-  if (!initialized || currentMode != FxMode::MASTER) {
+  if (!initialized) {
     return;
   }
-  hid->update();
-  ui->update(hid->getButtons());
+
+  if (currentMode == FxMode::MASTER) {
+    hid->update();
+    ui->update(hid->getButtons());
+    if (hid->pressed(Buttons::START)) {
+      setMode(FxMode::GAME);
+    }
+  }
+
+  if (currentMode == FxMode::GAME) {
+    hid->update();
+    if (hid->pressed(Buttons::SELECT)) {
+      setMode(FxMode::MASTER);
+    }
+  }
 }
 
 void FxManager::setMode(FxMode mode) {

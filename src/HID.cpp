@@ -8,9 +8,13 @@ HID::HID() {
 
 HID::~HID() {
   this->disable();
+  pinMode(BUTTON_PIN_SELECT, INPUT);
+  pinMode(BUTTON_PIN_START, INPUT);
 }
 
 bool HID::begin() {
+  pinMode(BUTTON_PIN_SELECT, INPUT_PULLUP);
+  pinMode(BUTTON_PIN_START, INPUT_PULLUP);
   this->enable();
   return true;
 }
@@ -19,8 +23,6 @@ bool HID::disable() {
   // disable pullups on disable state
   pinMode(BUTTON_PIN_A, INPUT);
   pinMode(BUTTON_PIN_B, INPUT);
-  pinMode(BUTTON_PIN_SELECT, INPUT);
-  pinMode(BUTTON_PIN_START, INPUT);
   pinMode(BUTTON_PIN_UP, INPUT);
   pinMode(BUTTON_PIN_DOWN, INPUT);
   pinMode(BUTTON_PIN_LEFT, INPUT);
@@ -35,8 +37,6 @@ bool HID::enable() {
   // enable pullups on enable state
   pinMode(BUTTON_PIN_A, INPUT_PULLUP);
   pinMode(BUTTON_PIN_B, INPUT_PULLUP);
-  pinMode(BUTTON_PIN_SELECT, INPUT_PULLUP);
-  pinMode(BUTTON_PIN_START, INPUT_PULLUP);
   pinMode(BUTTON_PIN_UP, INPUT_PULLUP);
   pinMode(BUTTON_PIN_DOWN, INPUT_PULLUP);
   pinMode(BUTTON_PIN_LEFT, INPUT_PULLUP);
