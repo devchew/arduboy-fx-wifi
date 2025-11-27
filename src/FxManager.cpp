@@ -1,5 +1,5 @@
 #include "FxManager.h"
-
+#include "UI.h"
 
 FxManager::FxManager() {
   arduboy = nullptr;
@@ -48,7 +48,7 @@ bool FxManager::begin() {
   }
 
   ui = new UI();
-  if (!ui->begin(oled->u8g2)) {
+  if (!ui->begin(oled->u8g2, *hid, *this)) {
     Serial.println("Failed to initialize UI!");
     return false;
   }
@@ -66,7 +66,7 @@ void FxManager::update() {
 
   if (currentMode == FxMode::MASTER) {
     hid->update();
-    ui->update(hid->getButtons());
+    ui->update();
     if (hid->pressed(Buttons::START)) {
       setMode(FxMode::GAME);
     }

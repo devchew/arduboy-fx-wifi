@@ -7,9 +7,10 @@
 #include "ArduboyController.h"
 #include "FileSystemManager.h"
 #include "OLEDController.h"
-#include "UI.h"
 #include "HID.h"
 #include "config.h"
+
+class UI;
 
 enum class FxMode { GAME, MASTER, PROGRAMMING };
 
