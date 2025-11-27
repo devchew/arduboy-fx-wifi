@@ -32,6 +32,14 @@
 // Uses default SPI pins (GPIO7=SCK, GPIO11=MOSI)
 
 // ==========================================
+// SD CONFIGURATION
+// ==========================================
+#define SD_CS_PIN        1
+#define SD_MOSI_PIN      2
+#define SD_MISO_PIN      4
+#define SD_SCK_PIN       3
+
+// ==========================================
 // Buttons pins
 // ==========================================
 #define BUTTON_PIN_UP     36 //34

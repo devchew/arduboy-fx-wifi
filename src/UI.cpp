@@ -77,13 +77,36 @@ void UI::screenButtonsTest(uint8_t buttonsState) const {
   }
 }
 
+void UI::showSplashScreen() {
+  if (millis() % 10 == 0) {
+    timer++;
+  }
+  int position = -128 + timer;
+  u8g2->drawXBMP(0, position > 0 ? 0 : position , 128, 64, splashImage);
+  if (timer > 200) {
+    currentScreen = 1; // Switch to buttons test screen
+    timer = 0;
+  }
+}
+
+
 void UI::update(uint8_t buttonsState) {
   if (buttonsState == lastButtonsState) {
     return; // No change in button state
   }
   u8g2->firstPage();
   do {
-    this->screenButtonsTest(buttonsState);
+    switch (currentScreen) {
+      case 0:
+        this->showSplashScreen();
+        break;
+      case 1:
+        this->screenButtonsTest(buttonsState);
+        break;
+      default:
+        currentScreen = 0;
+        break;
+    }
     yield();
   } while ( u8g2->nextPage() );
 
