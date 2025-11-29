@@ -4,11 +4,10 @@
 #include <Arduino.h>
 #include <U8g2lib.h>
 #include "HID.h"
+#include "Games.h"
+#include "FxManager.h"
 #include "Splash.h"
 #include "Buttons_Sprites.h"
-
-
-class FxManager;
 
 enum class Screen {
   SPLASH,
@@ -19,12 +18,27 @@ enum class Screen {
 
 class UI {
   private:
-    U8G2_SSD1309_128X64_NONAME0_1_4W_HW_SPI* u8g2;
+    U8G2_SCREEN* u8g2;
     HID* hid;
     FxManager* fxManager;
     uint8_t buttonsState = -1;
     Screen currentScreen = Screen::SPLASH;
-    uint8_t timer = 0;
+
+    // game list variables
+    // 0 = no direction, 1 = up, 2 = down, 3 = left, 4 = right
+    uint8_t direction = 0;
+    int yOffset = 0;
+    int xOffset = 0;
+    std::array<GameInfo, GAMES_PER_PAGE> loadedGames = {};
+    std::array<GamesCategory, MAX_CATEGORIES> categories = {};
+    uint8_t currentCategoryIndex = 0;
+    uint8_t currentGameOffset = 0;
+    uint8_t selectedGameIndex = 0;
+    uint16_t gamePosition = 0;
+
+
+    void drawTextCenter(const char* text, int8_t x_offset = 0, int8_t y_offset = 0) const;
+    void drawGameSplashScreen(const GameInfo& game, int8_t x_offset = 0, int8_t y_offset = 0) const;
 
     void screenButtonsTest() const;
     void splashScreen() ;
@@ -34,7 +48,7 @@ class UI {
   public:
     UI();
     ~UI();
-    bool begin(U8G2_SSD1309_128X64_NONAME0_1_4W_HW_SPI& u8g2, HID& hid, FxManager& fxManager);
+    bool begin(U8G2_SCREEN& u8g2, HID& hid, FxManager& fxManager);
     void update();
 };
 

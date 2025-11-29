@@ -8,6 +8,7 @@
 #include "FileSystemManager.h"
 #include "OLEDController.h"
 #include "HID.h"
+#include "Games.h"
 #include "config.h"
 
 class UI;
@@ -27,12 +28,16 @@ class FxManager {
   void setMode(FxMode mode);
   FxMode getMode() const { return currentMode; }
   void flashGame(const String& filename);
-  void listGames();
   void reset();
   void printInfo();
 
-  // Accessor methods
-  FileSystemManager* getFileSystemManager() const { return fileSystem; }
+  // Get games from one category with pagination
+  std::array<GameInfo, GAMES_PER_PAGE> listGames(const String& categoryPath = "", uint8_t offset = 0);
+
+  // get all categories list. Each categorry is a folder in /games
+  std::array<GamesCategory, MAX_CATEGORIES> getCategories();
+
+
 
  private:
   bool initialized;

@@ -26,6 +26,7 @@
 // ==========================================
 // OLED CONFIGURATION
 // ==========================================
+#define U8G2_SCREEN U8G2_SSD1309_128X64_NONAME0_F_4W_HW_SPI
 #define OLED_RESET_PIN    18  // GPIO18 (custom pin for OLED reset)
 #define OLED_DC_PIN       16     // GPIO17 (custom pin for OLED DC)
 #define OLED_CS_PIN       17     // GPIO16 (custom pin for OLED CS)

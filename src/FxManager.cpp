@@ -186,17 +186,118 @@ void FxManager::flashGame(const String& filename) {
   setMode(FxMode::GAME);
 }
 
-void FxManager::listGames() {
-  if (!initialized) {
-    Serial.println("[error] FxManager not initialized");
-    return;
-  }
+std::array<GamesCategory, 20> FxManager::getCategories() {
 
-  if (fileSystem) {
-    fileSystem->listHexFiles();
-  } else {
-    Serial.println("[error] Filesystem not initialized");
-  }
+  // mock for testing ui
+
+  return {
+      GamesCategory{"Action", "/action", 12},
+      GamesCategory{"Adventure", "/adventure", 8},
+      GamesCategory{"Puzzle", "/puzzle", 15},
+      GamesCategory{"Arcade", "/arcade", 10},
+      GamesCategory{"RPG", "/rpg", 5}
+  };
+
+  // std::array<GamesCategory, MAX_CATEGORIES> categories = {};
+  // if (!initialized) {
+  //   Serial.println("[error] FxManager not initialized");
+  //   return categories;
+  // }
+  //
+  // if (fileSystem) {
+  //   File gamesDir = fileSystem->openFile("/games");
+  //   if (!gamesDir || !gamesDir.isDirectory()) {
+  //     Serial.println("[error] /games directory not found");
+  //     return categories;
+  //   }
+  //
+  //   uint8_t index = 0;
+  //   File entry = gamesDir.openNextFile();
+  //   while (entry && index < MAX_CATEGORIES) {
+  //     if (entry.isDirectory()) {
+  //       categories[index].categoryName = String(entry.name()).substring(7); // remove "/games/"
+  //       categories[index].gameCount = 0;
+  //
+  //       // Count games in this category
+  //       File categoryDir = fileSystem->openFile(String(entry.name()));
+  //       File gameEntry = categoryDir.openNextFile();
+  //       while (gameEntry) {
+  //         if (!gameEntry.isDirectory() && fileSystem->isValidHexFile(String(gameEntry.name()))) {
+  //           categories[index].gameCount++;
+  //         }
+  //         gameEntry = categoryDir.openNextFile();
+  //       }
+  //
+  //       index++;
+  //     }
+  //     entry = gamesDir.openNextFile();
+  //   }
+  // } else {
+  //   Serial.println("[error] Filesystem not initialized");
+  // }
+  //
+  // return categories;
+
+}
+
+
+std::array<GameInfo, GAMES_PER_PAGE> FxManager::listGames(const String &categoryPath, uint8_t offset) {
+  //mock for tesing ui
+
+    std::array<GameInfo, GAMES_PER_PAGE> result = {};
+
+   String cat = categoryPath.length() ? categoryPath : "All";
+   for (size_t i = 0; i < GAMES_PER_PAGE; ++i) {
+     uint8_t idx = offset + i + 1;
+     String path = String("/games/") + cat + "/game" + String(idx) + ".hex";
+     String title = cat + " Game " + String(idx);
+     result[i] = GameInfo{path, title, "2023-01-01", "Dev", "Demo game.", "MIT"};
+   }
+   return result;
+
+  // if (!initialized) {
+  //   Serial.println("[error] FxManager not initialized");
+  //   return;
+  // }
+  //
+  // String dirPath = "/games";
+  // if (category.length() > 0) {
+  //   dirPath += "/" + category;
+  // }
+  //
+  // if (!fileSystem || !fileSystem->directoryExists(dirPath)) {
+  //   Serial.println("[error] Category not found: " + category);
+  //   return;
+  // }
+  //
+  // Serial.println("Listing games in category: " + (category.length() > 0 ? category : "All"));
+  // Serial.println("=====================================");
+  //
+  // File dir = fileSystem->openFile(dirPath);
+  // if (!dir) {
+  //   Serial.println("[error] Failed to open directory: " + dirPath);
+  //   return;
+  // }
+  //
+  // uint8_t count = 0;
+  // uint8_t listed = 0;
+  // File entry = dir.openNextFile();
+  // while (entry) {
+  //   if (!entry.isDirectory() && fileSystem->isValidHexFile(String(entry.name()))) {
+  //     if (count >= offset && listed < limit) {
+  //       Serial.printf("  %s (%u bytes)\n", String(entry.name()).c_str(), entry.size());
+  //       listed++;
+  //     }
+  //     count++;
+  //   }
+  //   entry = dir.openNextFile();
+  // }
+  //
+  // if (listed == 0) {
+  //   Serial.println("  No games found in this category.");
+  // }
+  //
+  // Serial.println("=====================================");
 }
 
 void FxManager::reset() {

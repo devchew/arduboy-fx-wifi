@@ -1,6 +1,6 @@
 #include "OLEDController.h"
 
-OLEDController::OLEDController() : u8g2(U8G2_SSD1309_128X64_NONAME0_1_4W_HW_SPI(U8G2_R0,
+OLEDController::OLEDController() : u8g2(U8G2_SSD1309_128X64_NONAME0_F_4W_HW_SPI(U8G2_R0,
     /* cs=*/U8X8_PIN_NONE,
     /* dc=*/OLED_DC_PIN,
     /* reset=*/OLED_RESET_PIN)), initialized(false), isMaster(false) {}

@@ -16,7 +16,7 @@ class OLEDController {
   OLEDController();
   ~OLEDController();
 
-  U8G2_SSD1309_128X64_NONAME0_1_4W_HW_SPI u8g2;
+  U8G2_SCREEN u8g2;
 
   // Initialization
   bool begin();
