@@ -31,8 +31,7 @@ class FxManager {
   void reset();
   void printInfo();
 
-  // Get games from one category with pagination
-  std::array<GameInfo, GAMES_PER_PAGE> listGames(const String& categoryPath = "", uint8_t offset = 0);
+  GameInfo getGameInfo(const String& categoryPath = "", uint8_t offset = 0);
 
   // get all categories list. Each categorry is a folder in /games
   std::array<GamesCategory, MAX_CATEGORIES> getCategories();

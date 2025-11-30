@@ -7,8 +7,8 @@
 
 #include <Arduino.h>
 
-#define MAX_CATEGORIES 20
-#define GAMES_PER_PAGE 5
+#define MAX_CATEGORIES 128
+#define GAMES_PER_PAGE 3
 
 struct GameInfo {
   String filePath;

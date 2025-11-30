@@ -186,12 +186,12 @@ void FxManager::flashGame(const String& filename) {
   setMode(FxMode::GAME);
 }
 
-std::array<GamesCategory, 20> FxManager::getCategories() {
+std::array<GamesCategory, MAX_CATEGORIES> FxManager::getCategories() {
 
   // mock for testing ui
 
   return {
-      GamesCategory{"Action", "/action", 12},
+      GamesCategory{"Action", "/action", 5},
       GamesCategory{"Adventure", "/adventure", 8},
       GamesCategory{"Puzzle", "/puzzle", 15},
       GamesCategory{"Arcade", "/arcade", 10},
@@ -240,64 +240,17 @@ std::array<GamesCategory, 20> FxManager::getCategories() {
 
 }
 
+GameInfo FxManager::getGameInfo(const String &categoryPath, uint8_t offset) {
+  // mock for testing ui
 
-std::array<GameInfo, GAMES_PER_PAGE> FxManager::listGames(const String &categoryPath, uint8_t offset) {
-  //mock for tesing ui
+  String cat = categoryPath.length() ? categoryPath : "All";
+  uint8_t idx = offset + 1;
+  String path = String("/games/") + cat + "/game" + String(idx) + ".hex";
+  String title = cat + " Game " + String(idx);
+  return GameInfo{path, title, "2023-01-01", "Dev", "Demo game.", "MIT"};
 
-    std::array<GameInfo, GAMES_PER_PAGE> result = {};
-
-   String cat = categoryPath.length() ? categoryPath : "All";
-   for (size_t i = 0; i < GAMES_PER_PAGE; ++i) {
-     uint8_t idx = offset + i + 1;
-     String path = String("/games/") + cat + "/game" + String(idx) + ".hex";
-     String title = cat + " Game " + String(idx);
-     result[i] = GameInfo{path, title, "2023-01-01", "Dev", "Demo game.", "MIT"};
-   }
-   return result;
-
-  // if (!initialized) {
-  //   Serial.println("[error] FxManager not initialized");
-  //   return;
-  // }
-  //
-  // String dirPath = "/games";
-  // if (category.length() > 0) {
-  //   dirPath += "/" + category;
-  // }
-  //
-  // if (!fileSystem || !fileSystem->directoryExists(dirPath)) {
-  //   Serial.println("[error] Category not found: " + category);
-  //   return;
-  // }
-  //
-  // Serial.println("Listing games in category: " + (category.length() > 0 ? category : "All"));
-  // Serial.println("=====================================");
-  //
-  // File dir = fileSystem->openFile(dirPath);
-  // if (!dir) {
-  //   Serial.println("[error] Failed to open directory: " + dirPath);
-  //   return;
-  // }
-  //
-  // uint8_t count = 0;
-  // uint8_t listed = 0;
-  // File entry = dir.openNextFile();
-  // while (entry) {
-  //   if (!entry.isDirectory() && fileSystem->isValidHexFile(String(entry.name()))) {
-  //     if (count >= offset && listed < limit) {
-  //       Serial.printf("  %s (%u bytes)\n", String(entry.name()).c_str(), entry.size());
-  //       listed++;
-  //     }
-  //     count++;
-  //   }
-  //   entry = dir.openNextFile();
-  // }
-  //
-  // if (listed == 0) {
-  //   Serial.println("  No games found in this category.");
-  // }
-  //
-  // Serial.println("=====================================");
+  // Placeholder implementation
+  // In a real implementation, this would read metadata from the HEX file or an associated file
 }
 
 void FxManager::reset() {

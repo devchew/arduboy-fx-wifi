@@ -65,10 +65,6 @@ void SerialCLI::update() {
       return;
     }
 
-    if (command == "list") {
-      fxManager->listGames();
-      return;
-    }
 
     if (command == "reset") {
       fxManager->reset();

@@ -18,7 +18,11 @@ bool UI::begin(U8G2_SCREEN& u8x8, HID& hidInstance, FxManager& fxManagerInstance
 
   // initially load games
   categories = fxManager->getCategories();
-  loadedGames = fxManager->listGames(categories[currentCategoryIndex].categoryPath, currentGameOffset);
+  loadedGames = {
+    GameInfo(),
+    fxManager->getGameInfo(categories[currentCategoryIndex].categoryPath, 0),
+    fxManager->getGameInfo(categories[currentCategoryIndex].categoryPath, 1),
+  };
   return true;
 }
 
@@ -138,7 +142,7 @@ void UI::screenGameList() {
       if (yOffset == 0) {
         direction = 0;
       }
-      if (gamePosition <= 0 && yOffset >= 21) {
+      if (currentGameIndex <= 0 && yOffset >= 21) {
         // prevent moving up if at the top of the list
         // but let the offset reset smoothly by continuing the animation
         // and reversing the direction
@@ -148,7 +152,15 @@ void UI::screenGameList() {
       if (yOffset >= 80) {
         yOffset = 0;
         direction = 0;
-        gamePosition--;
+        currentGameIndex--;
+
+        // check if we need to load previous games
+        // [3,4,5] -> [2,3,4] and 2 need to be loaded
+        loadedGames[2] = loadedGames[1];
+        loadedGames[1] = loadedGames[0];
+        if (currentGameIndex >= 0) {
+          loadedGames[0] = fxManager->getGameInfo(categories[currentCategoryIndex].categoryPath, currentGameIndex -1);
+        }
       }
       break;
     case 2: // DOWN
@@ -156,10 +168,26 @@ void UI::screenGameList() {
       if (yOffset == 0) {
         direction = 0;
       }
+      if (currentGameIndex >= categories[currentCategoryIndex].gameCount - 1 && yOffset < -21) {
+        // prevent moving down if at the end of the list
+        // but let the offset reset smoothly by continuing the animation
+        // and reversing the direction
+        direction = 1;
+        yOffset = -21;
+      }
       if (yOffset <= -80) {
         yOffset = 0;
         direction = 0;
-        gamePosition++;
+        currentGameIndex++;
+
+        // check if we need to load more games
+        // [3,4,5] -> [4,5,6] and 6 need to be loaded
+        loadedGames[0] = loadedGames[1];
+        loadedGames[1] = loadedGames[2];
+        if (currentGameIndex <= categories[currentCategoryIndex].gameCount) {
+          loadedGames[2] = fxManager->getGameInfo(categories[currentCategoryIndex].categoryPath, currentGameIndex +1);
+        }
+
       }
       break;
     default:
@@ -167,16 +195,20 @@ void UI::screenGameList() {
       break;
   }
 
+  u8g2->setFont(u8g2_font_4x6_tr);
+  // debug values
+  u8g2->drawStr(1, 63, ("gi:" + String(currentGameIndex) + " ci:" + String(currentCategoryIndex)).c_str());
+
   if (direction == 0) {
-    this->drawGameSplashScreen(loadedGames[gamePosition]);
+    this->drawGameSplashScreen(loadedGames[1]);
   }
 
-  if (gamePosition > 0) {
-    this->drawGameSplashScreen(loadedGames[gamePosition - 1], 0, -80 + yOffset);
+  if (currentGameIndex > 0) {
+    this->drawGameSplashScreen(loadedGames[0], 0, -80 + yOffset);
   }
 
-  this->drawGameSplashScreen(loadedGames[gamePosition], 0, 0 + yOffset);
-  this->drawGameSplashScreen(loadedGames[gamePosition + 1], 0, 80 + yOffset);
+  this->drawGameSplashScreen(loadedGames[1], 0, 0 + yOffset);
+  this->drawGameSplashScreen(loadedGames[2], 0, 80 + yOffset);
 
   u8g2->sendBuffer();
 }
