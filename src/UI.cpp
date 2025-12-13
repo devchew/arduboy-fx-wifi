@@ -8,13 +8,6 @@ bool UI::begin(U8G2_SCREEN& u8x8, HID& hidInstance, FxManager& fxManagerInstance
   hid = &hidInstance;
   fxManager = &fxManagerInstance;
 
-  // initially load games
-  categories = fxManager->getCategories();
-  loadedGames = {
-    GameInfo(),
-    fxManager->getGameInfo(categories[currentCategoryIndex].categoryPath, 0),
-    fxManager->getGameInfo(categories[currentCategoryIndex].categoryPath, 1),
-  };
   return true;
 }
 
@@ -90,7 +83,7 @@ void UI::splashScreen() {
     int position = -128 + yOffset;
     u8g2->drawXBMP(0, position > 0 ? 0 : position , 128, 64, splashImage);
     if (yOffset > 200) {
-      currentScreen = Screen::GAME_LIST; // Switch to buttons test screen
+      setScreen(Screen::GAME_LIST);
       yOffset = 0;
     }
     u8g2->sendBuffer();
@@ -103,122 +96,19 @@ void UI::drawTextCenter(const char *text, int8_t x_offset, int8_t y_offset) cons
   u8g2->drawStr(((128 - textWidth) / 2) + x_offset, 34 + y_offset, text);
 }
 
-void UI::drawGameSplashScreen(const GameInfo& game, int8_t x_offset, int8_t y_offset) const {
-  u8g2->setFont(u8g2_font_profont15_tr);
-  uint8_t textWidth = u8g2->getStrWidth(game.title.c_str());
-  u8g2->drawStr(((128 - textWidth) / 2) + x_offset, 20 + y_offset, game.title.c_str());
+void UI::setScreen(Screen screen) {
 
-  textWidth = u8g2->getStrWidth(game.author.c_str());
-  u8g2->drawStr(((128 - textWidth) / 2) + x_offset, 40 + y_offset, game.author.c_str());
-}
-
-void UI::drawCategoryScreen(const GamesCategory &category, int8_t x_offset, int8_t y_offset) const {
-  u8g2->setFont(u8g2_font_profont15_tr);
-  uint8_t textWidth = u8g2->getStrWidth(category.categoryName.c_str());
-  u8g2->drawStr(((128 - textWidth) / 2) + x_offset, 20 + y_offset, category.categoryName.c_str());
-
-  String gameCountText = String(category.gameCount) + " games";
-
-  textWidth = u8g2->getStrWidth(gameCountText.c_str());
-  u8g2->drawStr(((128 - textWidth) / 2) + x_offset, 40 + y_offset, gameCountText.c_str());
-}
-
-void UI::screenGameList() {
-  if (hid->pressed(Buttons::UP)) {
-    this->direction = 1;
-  }
-  if (hid->pressed(Buttons::DOWN)) {
-    this->direction = 2;
-  }
-
-  if (millis() % 5 != 0) {
-    return;
-  }
-
-  u8g2->clearBuffer();
-  u8g2->setFont(u8g2_font_profont15_tr);
-
-  switch (direction) {
-    case 1: // UP
-      yOffset++;
-      if (yOffset == 0) {
-        direction = 0;
-      }
-      if (currentGameIndex <= 0 && yOffset >= 21) {
-        // prevent moving up if at the top of the list
-        // but let the offset reset smoothly by continuing the animation
-        // and reversing the direction
-        direction = 2;
-        yOffset = 21;
-      }
-      if (yOffset >= 80) {
-        yOffset = 0;
-        direction = 0;
-        currentGameIndex--;
-
-        // check if we need to load previous games
-        // [3,4,5] -> [2,3,4] and 2 need to be loaded
-        loadedGames[2] = loadedGames[1];
-        loadedGames[1] = loadedGames[0];
-        if (currentGameIndex >= 0) {
-          loadedGames[0] = fxManager->getGameInfo(categories[currentCategoryIndex].categoryPath, currentGameIndex -1);
-        }
-      }
-      break;
-    case 2: // DOWN
-      yOffset--;
-      if (yOffset == 0) {
-        direction = 0;
-      }
-      if (currentGameIndex >= categories[currentCategoryIndex].gameCount - 1 && yOffset < -21) {
-        // prevent moving down if at the end of the list
-        // but let the offset reset smoothly by continuing the animation
-        // and reversing the direction
-        direction = 1;
-        yOffset = -21;
-      }
-      if (yOffset <= -80) {
-        yOffset = 0;
-        direction = 0;
-        currentGameIndex++;
-
-        // check if we need to load more games
-        // [3,4,5] -> [4,5,6] and 6 need to be loaded
-        loadedGames[0] = loadedGames[1];
-        loadedGames[1] = loadedGames[2];
-        if (currentGameIndex <= categories[currentCategoryIndex].gameCount) {
-          loadedGames[2] = fxManager->getGameInfo(categories[currentCategoryIndex].categoryPath, currentGameIndex +1);
-        }
-
-      }
-      break;
-    default:
-      yOffset = 0;
-      break;
-  }
-
-  u8g2->setFont(u8g2_font_4x6_tr);
-  // debug values
-  u8g2->drawStr(1, 63, ("gi:" + String(currentGameIndex) + " ci:" + (categories[currentCategoryIndex].categoryPath)).c_str());
-
-  if (fxManager->fileSystem->isInitialized()) {
-    u8g2->drawXBMP(115, 1, 11, 8, sprite_sd_card);
-  }
-
-
-  if (currentGameIndex > 0) {
-    this->drawGameSplashScreen(loadedGames[0], 0, -80 + yOffset);
-  }
-
-  if (currentGameIndex == 0) {
-    this->drawCategoryScreen(categories[currentGameIndex], 0, 0 + yOffset);
+  if (screen == Screen::GAME_LIST) {
+    gameSelection = new UI_GameSelection(*fxManager);
   } else {
-    this->drawGameSplashScreen(loadedGames[1], 0, 0 + yOffset);
+    if (gameSelection != nullptr) {
+      delete gameSelection;
+      gameSelection = nullptr;
+    }
   }
-  // this->drawGameSplashScreen(loadedGames[1], 0, 0 + yOffset);
-  this->drawGameSplashScreen(loadedGames[2], 0, 80 + yOffset);
 
-  u8g2->sendBuffer();
+  currentScreen = screen;
+
 }
 
 void UI::screenFlashGame() const {
@@ -232,21 +122,15 @@ void UI::screenFlashGame() const {
 void UI::update() {
   buttonsState = hid->getButtons();
   if (hid->pressed(Buttons::SELECT)) {
-    currentScreen = Screen::BUTTONS_TEST;
+    setScreen(Screen::BUTTONS_TEST);
     return;
   }
   if (hid->pressed(Buttons::B)) {
-    categories = fxManager->getCategories();
-    loadedGames = {
-      GameInfo(),
-      fxManager->getGameInfo(categories[currentCategoryIndex].categoryPath, 0),
-      fxManager->getGameInfo(categories[currentCategoryIndex].categoryPath, 1),
-    };
-    currentScreen = Screen::GAME_LIST;
+    setScreen(Screen::GAME_LIST);
     return;
   }
   if (hid->pressed(Buttons::A)) {
-    currentScreen = Screen::FLASH_GAME;
+    setScreen(Screen::FLASH_GAME);
     return;
   }
   switch (currentScreen) {
@@ -257,13 +141,15 @@ void UI::update() {
       this->screenButtonsTest();
       break;
     case Screen::GAME_LIST:
-      this->screenGameList();
+      if (gameSelection != nullptr) {
+        gameSelection->draw();
+      }
       break;
     case Screen::FLASH_GAME:
       this->screenFlashGame();
       break;
     default:
-      currentScreen = Screen::SPLASH;
+      setScreen(Screen::SPLASH);
       break;
   }
 }

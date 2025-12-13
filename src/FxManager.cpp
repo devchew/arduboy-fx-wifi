@@ -27,7 +27,7 @@ bool FxManager::begin() {
 
   // Initialize ArduboyController
   arduboy = new ArduboyController();
-  if (!arduboy->begin()) {
+  if (!arduboy->begin(ISP_RESET_PIN, HEX_BUFFER_SIZE)) {
     Serial.println("Failed to initialize ArduboyController!");
     return false;
   }

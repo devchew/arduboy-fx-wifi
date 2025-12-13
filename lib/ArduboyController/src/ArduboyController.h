@@ -6,19 +6,23 @@
 #include <HexParser.h>
 #include <ISPProgrammer.h>
 #include <FS.h>
-#include "config.h"
 
 class ArduboyController {
  private:
   HexParser* hexParser;
   ISPProgrammer* ispProgrammer;
   bool initialized;
+  uint8_t pinReset;
 
  public:
   ArduboyController();
   ~ArduboyController();
 
-  bool begin();
+  bool begin(uint8_t pinReset, uint32_t hexBufferSize);
+  bool begin(uint8_t pinReset) {
+    return begin(pinReset, 32768); // 32KB for ATmega32U4
+  }
+
   void end();
 
   bool checkConnection();

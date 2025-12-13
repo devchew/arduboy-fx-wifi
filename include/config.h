@@ -2,9 +2,9 @@
 #define CONFIG_H
 
 // ==========================================
-// SERIAL ALIAS CONFIGURATION
+// SERIAL CONFIGURATION
 // ==========================================
-// Create alias for Serial to use Serial0 (native USB port on ESP32-S2)
+#define SERIAL_BAUD_RATE  115200
 // #define Serial Serial0
 
 // ==========================================
@@ -17,11 +17,13 @@
 // Note: These are the default pins, no need to define them explicitly
 
 // ==========================================
-// ISP PIN CONFIGURATION
+// ISP PROGRAMMER CONFIGURATION
 // ==========================================
 // ISP pin definitions for ESP32-S2 to ATmega32U4 (Arduboy)
 #define ISP_RESET_PIN     21  // GPIO15 (custom pin for reset)
 // Uses default SPI pins (GPIO7=SCK, GPIO11=MOSI, GPIO9=MISO)
+// Flash buffer size for ATmega32U4 (Arduboy)
+#define HEX_BUFFER_SIZE   32768  // 32KB for ATmega32U4
 
 // ==========================================
 // OLED CONFIGURATION
@@ -61,38 +63,5 @@
 #define WIFI_SSID         "your_wifi_ssid"
 #define WIFI_PASSWORD     "your_wifi_password"
 
-// ==========================================
-// HEX PARSER CONFIGURATION
-// ==========================================
-// Flash buffer size for ATmega32U4 (Arduboy)
-#define HEX_BUFFER_SIZE   32768  // 32KB for ATmega32U4
-
-// Default HEX file path
-#define DEFAULT_HEX_PATH  "/firmware.hex"
-
-// ==========================================
-// SERIAL CONFIGURATION
-// ==========================================
-#define SERIAL_BAUD_RATE  115200
-
-// ==========================================
-// FILESYSTEM CONFIGURATION
-// ==========================================
-// Enable automatic filesystem formatting if mount fails
-#define AUTO_FORMAT_FS    false
-
-// ==========================================
-// PROGRAMMING CONFIGURATION
-// ==========================================
-// Enable verbose programming output
-#define VERBOSE_PROGRAMMING true
-
-// Programming delays (milliseconds)
-#define CHIP_ERASE_DELAY 100
-#define PAGE_WRITE_DELAY 10
-
-// Progress update frequency
-#define PROGRESS_UPDATE_PAGES 10    // Show progress every N pages
-#define PROGRESS_UPDATE_BYTES 1024  // Show verify progress every N bytes
 
 #endif  // CONFIG_H

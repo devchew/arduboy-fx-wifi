@@ -1,5 +1,5 @@
 #include "ArduboyController.h"
-#include "config.h"
+
 
 ArduboyController::ArduboyController() {
   hexParser = nullptr;
@@ -9,22 +9,24 @@ ArduboyController::ArduboyController() {
 
 ArduboyController::~ArduboyController() { end(); }
 
-bool ArduboyController::begin() {
+bool ArduboyController::begin(uint8_t pinReset, uint32_t hexBufferSize) {
   if (initialized) {
     return true;
   }
 
-  pinMode(ISP_RESET_PIN, OUTPUT);
+  this->pinReset = pinReset;
+
+  pinMode(this->pinReset, OUTPUT);
 
   // Initialize HEX parser
-  hexParser = new HexParser(HEX_BUFFER_SIZE);
+  hexParser = new HexParser(hexBufferSize);
   if (!hexParser) {
     Serial.println("Failed to create HEX parser");
     return false;
   }
 
   // Initialize ISP programmer (using default hardware SPI pins)
-  ispProgrammer = new ISPProgrammer(ISP_RESET_PIN);
+  ispProgrammer = new ISPProgrammer(this->pinReset);
   if (!ispProgrammer) {
     Serial.println("Failed to create ISP programmer");
     delete hexParser;
@@ -164,7 +166,7 @@ void ArduboyController::printDeviceInfo() {
 bool ArduboyController::powerOn() {
   Serial.println("Powering on Arduboy...");
 
-  digitalWrite(ISP_RESET_PIN, HIGH);
+  digitalWrite(this->pinReset, HIGH);
 
   // Give some time for power to stabilize
   delay(100);
@@ -176,7 +178,7 @@ bool ArduboyController::powerOn() {
 bool ArduboyController::powerOff() {
   Serial.println("Powering off Arduboy...");
 
-  digitalWrite(ISP_RESET_PIN, LOW);
+  digitalWrite(this->pinReset, LOW);
 
   Serial.println("Arduboy powered off");
   return true;

@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include <SPI.h>
 
-#include "ArduboyController.h"
+#include <ArduboyController.h>
 #include "FileSystemManager.h"
 #include "OLEDController.h"
 #include "HID.h"
