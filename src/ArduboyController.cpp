@@ -83,21 +83,21 @@ bool ArduboyController::checkConnection() {
   return connected;
 }
 
-bool ArduboyController::flash(const String& filename) {
+bool ArduboyController::flash(File& file) {
   if (!initialized || !hexParser || !ispProgrammer) {
     Serial.println("ArduboyController not initialized");
     return false;
   }
 
-  String fullPath = filename;
-  if (!fullPath.startsWith("/")) {
-    fullPath = "/" + fullPath;
+  Serial.printf("Flashing Arduboy with: %s\n", file.name());
+
+  if (!file) {
+    Serial.println("Failed to open HEX file");
+    return false;
   }
 
-  Serial.printf("Flashing Arduboy with: %s\n", fullPath.c_str());
-
   // Parse HEX file
-  if (!hexParser->parseFile(fullPath)) {
+  if (!hexParser->parseFile(file)) {
     Serial.println("Failed to parse HEX file");
     return false;
   }

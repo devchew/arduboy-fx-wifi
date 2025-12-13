@@ -172,8 +172,14 @@ void FxManager::flashGame(const String& filename) {
     return;
   }
 
+  File file = fileSystem->openFile(filepath);
+  if (!file) {
+    Serial.println("[error] Failed to open file: " + filepath);
+    return;
+  }
+
   Serial.println("Starting flash operation...");
-  bool success = arduboy->flash(filepath);
+  bool success = arduboy->flash(file);
 
   if (success) {
     Serial.println("[success] Flash completed successfully!");

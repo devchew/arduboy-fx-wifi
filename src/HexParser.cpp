@@ -30,19 +30,19 @@ void HexParser::clearBuffer() {
   }
 }
 
-bool HexParser::parseFile(const char* filename) {
+bool HexParser::parseFile(File& file) {
+
   if (!flash_buffer) {
     Serial.println("Flash buffer not allocated");
     return false;
   }
 
-  File file = LittleFS.open(filename, "r");
   if (!file) {
-    Serial.printf("Failed to open file: %s\n", filename);
+    Serial.print("Failed to open file");
     return false;
   }
 
-  Serial.printf("Parsing HEX file: %s (%d bytes)\n", filename, file.size());
+  Serial.printf("Parsing HEX file: %s (%d bytes)\n", file.name(), file.size());
 
   // Initialize HEX parser
   ihex_begin_read(&ihex_state);

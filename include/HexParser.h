@@ -2,10 +2,9 @@
 #define HEX_PARSER_H
 
 #include <Arduino.h>
-#include <LittleFS.h>
+#include <FS.h>
 
 #include "kk_ihex_read.h"
-#include "config.h"
 
 class HexParser {
  private:
@@ -24,8 +23,7 @@ class HexParser {
   HexParser(uint32_t buffer_size = 32768);
   ~HexParser();
 
-  bool parseFile(const char* filename);
-  bool parseFile(const String& filename) { return parseFile(filename.c_str()); }
+  bool parseFile(File& file);
 
   uint8_t* getFlashBuffer() const { return flash_buffer; }
   uint32_t getFlashSize() const { return flash_size; }

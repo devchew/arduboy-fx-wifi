@@ -5,6 +5,7 @@
 
 #include "HexParser.h"
 #include "ISPProgrammer.h"
+#include <FS.h>
 #include "config.h"
 
 class ArduboyController {
@@ -21,7 +22,7 @@ class ArduboyController {
   void end();
 
   bool checkConnection();
-  bool flash(const String& filename);
+  bool flash(File& file);
   bool reset();
   bool powerOn();
   bool powerOff();
