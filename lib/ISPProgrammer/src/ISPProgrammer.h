@@ -4,8 +4,6 @@
 #include <Arduino.h>
 #include <SPI.h>
 
-#include "config.h"
-
 // Device signatures
 #define ATMEGA32U4_SIGNATURE_0  0x1E
 #define ATMEGA32U4_SIGNATURE_1  0x95

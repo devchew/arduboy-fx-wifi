@@ -1,17 +1,5 @@
 #include "ArduboyController.h"
-
 #include "config.h"
-
-// ==========================================
-// IHEX CALLBACK FUNCTION
-// ==========================================
-// Global callback function required by kk_ihex library
-extern "C" ihex_bool_t ihex_data_read(struct ihex_state* ihex,
-                                      ihex_record_type_t type,
-                                      ihex_bool_t checksum_error) {
-  // Forward to HexParser static callback
-  return HexParser::ihex_data_callback(ihex, type, checksum_error);
-}
 
 ArduboyController::ArduboyController() {
   hexParser = nullptr;

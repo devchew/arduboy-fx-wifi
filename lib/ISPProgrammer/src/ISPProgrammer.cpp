@@ -1,7 +1,5 @@
 #include "ISPProgrammer.h"
 
-#include <SPI.h>
-
 ISPProgrammer::ISPProgrammer(uint8_t reset_pin) {
   this->reset_pin = reset_pin;
   device_detected = false;
