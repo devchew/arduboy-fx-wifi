@@ -2,14 +2,14 @@
 #define FILESYSTEMMANAGER_H
 
 #include <Arduino.h>
-#include <FS.h>
-#include <LittleFS.h>
+#include "SD.h"
+#include <SPI.h>
 #include "config.h"
+
 class FileSystemManager {
 private:
-  bool initialized;
-
-  // Internal utility functions
+  bool initialized = false;
+  SPIClass* sdSPI = nullptr;
   void printFileInfo(File file, int level = 0);
 
 public:
@@ -37,11 +37,7 @@ public:
   bool copyFile(const String& sourcePath, const String& destPath);
 
   // System operations
-  bool format();
   void getInfo();
-  size_t getTotalBytes();
-  size_t getUsedBytes();
-  size_t getFreeBytes();
 
   // File streaming (for large files)
   File openFile(const String& path, const String& mode = "r");

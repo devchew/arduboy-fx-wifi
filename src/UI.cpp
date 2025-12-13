@@ -1,14 +1,6 @@
 #include "UI.h"
 
-
-UI::UI() {
-  u8g2 = nullptr;
-  buttonsState = -1;
-  hid = nullptr;
-  fxManager = nullptr;
-  currentScreen = Screen::SPLASH;
-}
-
+UI::UI() {}
 UI::~UI() = default;
 
 bool UI::begin(U8G2_SCREEN& u8x8, HID& hidInstance, FxManager& fxManagerInstance) {
@@ -120,6 +112,16 @@ void UI::drawGameSplashScreen(const GameInfo& game, int8_t x_offset, int8_t y_of
   u8g2->drawStr(((128 - textWidth) / 2) + x_offset, 40 + y_offset, game.author.c_str());
 }
 
+void UI::drawCategoryScreen(const GamesCategory &category, int8_t x_offset, int8_t y_offset) const {
+  u8g2->setFont(u8g2_font_profont15_tr);
+  uint8_t textWidth = u8g2->getStrWidth(category.categoryName.c_str());
+  u8g2->drawStr(((128 - textWidth) / 2) + x_offset, 20 + y_offset, category.categoryName.c_str());
+
+  String gameCountText = String(category.gameCount) + " games";
+
+  textWidth = u8g2->getStrWidth(gameCountText.c_str());
+  u8g2->drawStr(((128 - textWidth) / 2) + x_offset, 40 + y_offset, gameCountText.c_str());
+}
 
 void UI::screenGameList() {
   if (hid->pressed(Buttons::UP)) {
@@ -197,17 +199,23 @@ void UI::screenGameList() {
 
   u8g2->setFont(u8g2_font_4x6_tr);
   // debug values
-  u8g2->drawStr(1, 63, ("gi:" + String(currentGameIndex) + " ci:" + String(currentCategoryIndex)).c_str());
+  u8g2->drawStr(1, 63, ("gi:" + String(currentGameIndex) + " ci:" + (categories[currentCategoryIndex].categoryPath)).c_str());
 
-  if (direction == 0) {
-    this->drawGameSplashScreen(loadedGames[1]);
+  if (fxManager->fileSystem->isInitialized()) {
+    u8g2->drawXBMP(115, 1, 11, 8, sprite_sd_card);
   }
+
 
   if (currentGameIndex > 0) {
     this->drawGameSplashScreen(loadedGames[0], 0, -80 + yOffset);
   }
 
-  this->drawGameSplashScreen(loadedGames[1], 0, 0 + yOffset);
+  if (currentGameIndex == 0) {
+    this->drawCategoryScreen(categories[currentGameIndex], 0, 0 + yOffset);
+  } else {
+    this->drawGameSplashScreen(loadedGames[1], 0, 0 + yOffset);
+  }
+  // this->drawGameSplashScreen(loadedGames[1], 0, 0 + yOffset);
   this->drawGameSplashScreen(loadedGames[2], 0, 80 + yOffset);
 
   u8g2->sendBuffer();
@@ -228,6 +236,12 @@ void UI::update() {
     return;
   }
   if (hid->pressed(Buttons::B)) {
+    categories = fxManager->getCategories();
+    loadedGames = {
+      GameInfo(),
+      fxManager->getGameInfo(categories[currentCategoryIndex].categoryPath, 0),
+      fxManager->getGameInfo(categories[currentCategoryIndex].categoryPath, 1),
+    };
     currentScreen = Screen::GAME_LIST;
     return;
   }

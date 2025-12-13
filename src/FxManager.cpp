@@ -25,8 +25,6 @@ bool FxManager::begin() {
     return false;
   }
 
-  // todo: SPI line sharing with oled fight each other
-
   // Initialize ArduboyController
   arduboy = new ArduboyController();
   if (!arduboy->begin()) {
@@ -187,56 +185,68 @@ void FxManager::flashGame(const String& filename) {
 }
 
 std::array<GamesCategory, MAX_CATEGORIES> FxManager::getCategories() {
+  String gamesRoot = "/arduboy";
 
-  // mock for testing ui
+  std::array<GamesCategory, MAX_CATEGORIES> categories = {};
+  if (!initialized) {
+    Serial.println("[error] FxManager not initialized");
+    return categories;
+  }
 
-  return {
-      GamesCategory{"Action", "/action", 5},
-      GamesCategory{"Adventure", "/adventure", 8},
-      GamesCategory{"Puzzle", "/puzzle", 15},
-      GamesCategory{"Arcade", "/arcade", 10},
-      GamesCategory{"RPG", "/rpg", 5}
-  };
+  if (!fileSystem) {
+    Serial.println("[error] Filesystem not initialized");
+    return categories;
+  }
 
-  // std::array<GamesCategory, MAX_CATEGORIES> categories = {};
-  // if (!initialized) {
-  //   Serial.println("[error] FxManager not initialized");
-  //   return categories;
-  // }
-  //
-  // if (fileSystem) {
-  //   File gamesDir = fileSystem->openFile("/games");
-  //   if (!gamesDir || !gamesDir.isDirectory()) {
-  //     Serial.println("[error] /games directory not found");
-  //     return categories;
-  //   }
-  //
-  //   uint8_t index = 0;
-  //   File entry = gamesDir.openNextFile();
-  //   while (entry && index < MAX_CATEGORIES) {
-  //     if (entry.isDirectory()) {
-  //       categories[index].categoryName = String(entry.name()).substring(7); // remove "/games/"
-  //       categories[index].gameCount = 0;
-  //
-  //       // Count games in this category
-  //       File categoryDir = fileSystem->openFile(String(entry.name()));
-  //       File gameEntry = categoryDir.openNextFile();
-  //       while (gameEntry) {
-  //         if (!gameEntry.isDirectory() && fileSystem->isValidHexFile(String(gameEntry.name()))) {
-  //           categories[index].gameCount++;
-  //         }
-  //         gameEntry = categoryDir.openNextFile();
-  //       }
-  //
-  //       index++;
-  //     }
-  //     entry = gamesDir.openNextFile();
-  //   }
-  // } else {
-  //   Serial.println("[error] Filesystem not initialized");
-  // }
-  //
-  // return categories;
+  File gamesDir = fileSystem->openFile(gamesRoot);
+  if (!gamesDir || !gamesDir.isDirectory()) {
+    Serial.printf("[error] Games directory not found: %s\n", gamesRoot.c_str());
+    return categories;
+  }
+
+  uint8_t index = 0;
+  File entry = gamesDir.openNextFile();
+  while (entry && index < MAX_CATEGORIES) {
+    if (!entry.isDirectory()) {
+      Serial.printf("[FILE skipped] %s (%u bytes)\n", entry.name(), entry.size());
+      entry = gamesDir.openNextFile();
+      continue;
+    }
+    String childName = String(entry.name());
+    String subPath;
+    if (childName.length() > 0 && childName.charAt(0) == '/') {
+      subPath = childName;
+    } else {
+      subPath = gamesRoot;
+      if (!subPath.endsWith("/")) subPath += "/";
+      subPath += childName;
+    }
+    categories[index].categoryName = childName;
+    categories[index].categoryPath = subPath;
+    categories[index].gameCount = 0;
+
+    Serial.printf("[DIR CAT] %s/ %s\n", entry.name(), subPath.c_str());
+
+    // Count games in this category
+    File subRoot = fileSystem->openFile(subPath);
+    if (subRoot) {
+      File subFile = subRoot.openNextFile();
+      while (subFile) {
+        Serial.printf("[DIR GAME]  %s/\n", subFile.name());
+        categories[index].gameCount++;
+        subFile.close();
+        subFile = subRoot.openNextFile();
+      }
+      subRoot.close();
+    } else {
+      Serial.printf("Failed to open subdirectory: %s\n", subPath.c_str());
+    }
+
+    index++;
+    entry = gamesDir.openNextFile();
+  }
+
+  return categories;
 
 }
 

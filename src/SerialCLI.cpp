@@ -65,6 +65,66 @@ void SerialCLI::update() {
       return;
     }
 
+    if (command == "ls") {
+      if (args.length() == 0) {
+        Serial.println("Usage: ls <path>");
+        return;
+      }
+      fxManager->fileSystem->listDirectory(args);
+      return;
+    }
+
+    if (command== "games") {
+      auto categories = fxManager->getCategories();
+      if (categories[0].categoryName.length() == 0) {
+        Serial.println("No game categories found.");
+        return;
+      }
+      for ( const auto& category : categories) {
+        if (category.categoryName.length() == 0) {
+          break;
+        }
+        Serial.printf("Category: %s (%u games)\n", category.categoryName.c_str(), category.gameCount);
+      }
+
+      return;
+    }
+
+    if (command == "card") {
+      fxManager->fileSystem->getInfo();
+      return;
+    }
+
+    if (command == "mkdir") {
+          if (args.length() == 0) {
+            Serial.println("Usage: mkdir <path>");
+            return;
+          }
+          fxManager->fileSystem->createDirectory(args);
+          return;
+        }
+
+
+
+        if (command == "cat") {
+          if (args.length() == 0) {
+            Serial.println("Usage: cat <filename>");
+            return;
+          }
+          fxManager->fileSystem->readFile(args);
+          return;
+        }
+
+        if (command == "reset") {
+          fxManager->reset();
+          return;
+        }
+
+        if (command == "info") {
+          fxManager->printInfo();
+          return;
+        }
+
 
     if (command == "reset") {
       fxManager->reset();

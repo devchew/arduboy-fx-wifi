@@ -1,0 +1,12 @@
+//
+// Created by Infin on 12.12.2025.
+//
+
+#ifndef ARDUBOY_FX_WIFI_ICONS_H
+#define ARDUBOY_FX_WIFI_ICONS_H
+
+#include <U8g2lib.h>
+
+static const unsigned char sprite_sd_card[] U8X8_PROGMEM = {0xff,0x07,0xff,0x04,0xff,0x07,0xff,0x04,0xff,0x07,0xff,0x04,0xff,0x07,0x67,0x00};
+
+#endif //ARDUBOY_FX_WIFI_ICONS_H

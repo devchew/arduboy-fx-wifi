@@ -1,7 +1,3 @@
-//
-// Created by Infin on 27.11.2025.
-//
-
 #ifndef ARDUBOY_FX_WIFI_BUTTONS_SPRITES_H
 #define ARDUBOY_FX_WIFI_BUTTONS_SPRITES_H
 

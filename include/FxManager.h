@@ -37,15 +37,15 @@ class FxManager {
   std::array<GamesCategory, MAX_CATEGORIES> getCategories();
 
 
-
- private:
-  bool initialized;
+  FileSystemManager* fileSystem;
   FxMode currentMode;
   ArduboyController* arduboy;
-  FileSystemManager* fileSystem;
   OLEDController* oled;
   UI* ui;
   HID* hid;
+
+ private:
+  bool initialized;
 
   void triStateSPIPins();
   void activateSPIPins();

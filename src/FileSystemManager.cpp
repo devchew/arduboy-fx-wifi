@@ -1,6 +1,6 @@
 #include "FileSystemManager.h"
 
-FileSystemManager::FileSystemManager() : initialized(false) {}
+FileSystemManager::FileSystemManager() {}
 
 FileSystemManager::~FileSystemManager() {
   end();
@@ -11,8 +11,18 @@ bool FileSystemManager::begin() {
     return true;
   }
 
-  if (!LittleFS.begin()) {
-    Serial.println("Failed to mount LittleFS filesystem");
+  // SDCARD
+  pinMode(SD_CS_PIN, OUTPUT); // SS
+
+  sdSPI = new SPIClass(2);
+  sdSPI->begin(SD_SCK_PIN, SD_MISO_PIN, SD_MOSI_PIN, SD_CS_PIN);
+  if (!SD.begin(SD_CS_PIN, *sdSPI)) {
+    Serial.println("Nie udalo sie zainicjowac karty SD");
+    return false;
+  }
+
+  if (SD.cardType() == CARD_NONE) {
+    Serial.println("Brak karty SD");
     return false;
   }
 
@@ -23,7 +33,7 @@ bool FileSystemManager::begin() {
 
 void FileSystemManager::end() {
   if (initialized) {
-    LittleFS.end();
+    SD.end();
     initialized = false;
   }
 }
@@ -38,7 +48,7 @@ void FileSystemManager::listDirectory(const String& path, uint8_t maxLevels) {
     return;
   }
 
-  File root = LittleFS.open(path);
+  File root = SD.open(path);
   if (!root) {
     Serial.printf("Failed to open directory: %s\n", path.c_str());
     return;
@@ -57,9 +67,18 @@ void FileSystemManager::listDirectory(const String& path, uint8_t maxLevels) {
   while (file) {
     printFileInfo(file, 0);
     if (file.isDirectory() && maxLevels > 0) {
-      // Recursively list subdirectories
-      String subPath = String(file.path());
-      File subRoot = LittleFS.open(subPath);
+      // Build proper subPath: if file.name() is absolute use it, otherwise append to current path
+      String childName = String(file.name());
+      String subPath;
+      if (childName.length() > 0 && childName.charAt(0) == '/') {
+        subPath = childName;
+      } else {
+        subPath = path;
+        if (!subPath.endsWith("/")) subPath += "/";
+        subPath += childName;
+      }
+
+      File subRoot = SD.open(subPath);
       if (subRoot) {
         File subFile = subRoot.openNextFile();
         while (subFile) {
@@ -68,6 +87,8 @@ void FileSystemManager::listDirectory(const String& path, uint8_t maxLevels) {
           subFile = subRoot.openNextFile();
         }
         subRoot.close();
+      } else {
+        Serial.printf("Failed to open subdirectory: %s\n", subPath.c_str());
       }
     }
     file.close();
@@ -81,21 +102,21 @@ bool FileSystemManager::createDirectory(const String& path) {
   if (!initialized) {
     return false;
   }
-  return LittleFS.mkdir(path);
+  return SD.mkdir(path);
 }
 
 bool FileSystemManager::removeDirectory(const String& path) {
   if (!initialized) {
     return false;
   }
-  return LittleFS.rmdir(path);
+  return SD.rmdir(path);
 }
 
 bool FileSystemManager::directoryExists(const String& path) {
   if (!initialized) {
     return false;
   }
-  File dir = LittleFS.open(path);
+  File dir = SD.open(path);
   if (dir && dir.isDirectory()) {
     dir.close();
     return true;
@@ -112,14 +133,14 @@ bool FileSystemManager::fileExists(const String& path) {
   if (!initialized) {
     return false;
   }
-  return LittleFS.exists(path);
+  return SD.exists(path);
 }
 
 size_t FileSystemManager::getFileSize(const String& path) {
   if (!initialized || !fileExists(path)) {
     return 0;
   }
-  File file = LittleFS.open(path, "r");
+  File file = openFile(path, "r");
   if (!file) {
     return 0;
   }
@@ -133,7 +154,7 @@ String FileSystemManager::readFile(const String& path) {
     return "";
   }
 
-  File file = LittleFS.open(path, "r");
+  File file = openFile(path, "r");
   if (!file) {
     Serial.printf("Failed to open file for reading: %s\n", path.c_str());
     return "";
@@ -149,7 +170,13 @@ bool FileSystemManager::writeFile(const String& path, const String& content) {
     return false;
   }
 
-  File file = LittleFS.open(path, "w");
+  // Overwrite: remove existing then open for write
+  if (SD.exists(path)) {
+    Serial.printf("File exists: %s\n", path.c_str());
+    return false;
+  }
+
+  File file = openFile(path, "w");
   if (!file) {
     Serial.printf("Failed to open file for writing: %s\n", path.c_str());
     return false;
@@ -165,7 +192,7 @@ bool FileSystemManager::appendFile(const String& path, const String& content) {
     return false;
   }
 
-  File file = LittleFS.open(path, "a");
+  File file = openFile(path, "a");
   if (!file) {
     Serial.printf("Failed to open file for appending: %s\n", path.c_str());
     return false;
@@ -180,7 +207,7 @@ bool FileSystemManager::deleteFile(const String& path) {
   if (!initialized) {
     return false;
   }
-  return LittleFS.remove(path);
+  return SD.remove(path);
 }
 
 bool FileSystemManager::copyFile(const String& sourcePath, const String& destPath) {
@@ -200,55 +227,36 @@ bool FileSystemManager::copyFile(const String& sourcePath, const String& destPat
 // SYSTEM OPERATIONS
 // ==========================================
 
-bool FileSystemManager::format() {
-  if (!initialized) {
-    return false;
-  }
-  
-  Serial.println("Formatting filesystem...");
-  LittleFS.end();
-  initialized = false;
-  
-  bool success = LittleFS.format();
-  if (success) {
-    Serial.println("Format successful");
-    return begin(); // Reinitialize
-  } else {
-    Serial.println("Format failed");
-    return false;
-  }
-}
-
 void FileSystemManager::getInfo() {
   if (!initialized) {
     Serial.println("FileSystem not initialized");
     return;
   }
 
-  size_t total = getTotalBytes();
-  size_t used = getUsedBytes();
-  size_t free = getFreeBytes();
-
+  auto cardType = SD.cardType();
   Serial.println("=====================================");
   Serial.println("FILESYSTEM INFO");
   Serial.println("=====================================");
-  Serial.printf("Total space: %u bytes (%.2f KB)\n", total, total / 1024.0);
-  Serial.printf("Used space:  %u bytes (%.2f KB)\n", used, used / 1024.0);
-  Serial.printf("Free space:  %u bytes (%.2f KB)\n", free, free / 1024.0);
-  Serial.printf("Usage: %.1f%%\n", (used * 100.0) / total);
+  Serial.print("Card Type: ");
+  switch (cardType) {
+    case CARD_MMC:
+      Serial.println("MMC");
+      break;
+    case CARD_SD:
+      Serial.println("SDSC");
+      break;
+    case CARD_SDHC:
+      Serial.println("SDHC");
+      break;
+    case CARD_UNKNOWN:
+    default:
+      Serial.println("UNKNOWN");
+      break;
+  }
+
+  uint32_t cardSizeMB = (uint32_t)(SD.cardSize() / (1024ULL * 1024ULL));
+  Serial.printf("Card Size: %u MB\n", cardSizeMB);
   Serial.println("=====================================");
-}
-
-size_t FileSystemManager::getTotalBytes() {
-  return LittleFS.totalBytes();
-}
-
-size_t FileSystemManager::getUsedBytes() {
-  return LittleFS.usedBytes();
-}
-
-size_t FileSystemManager::getFreeBytes() {
-  return getTotalBytes() - getUsedBytes();
 }
 
 // ==========================================
@@ -259,7 +267,21 @@ File FileSystemManager::openFile(const String& path, const String& mode) {
   if (!initialized) {
     return File();
   }
-  return LittleFS.open(path, mode.c_str());
+
+  if (mode == "r") {
+    return SD.open(path, FILE_READ);
+  } else if (mode == "w") {
+    // overwrite
+    if (SD.exists(path)) SD.remove(path);
+    return SD.open(path, FILE_WRITE);
+  } else if (mode == "a") {
+    File f = SD.open(path, FILE_WRITE);
+    if (f) f.seek(f.size());
+    return f;
+  } else {
+    // fallback
+    return SD.open(path);
+  }
 }
 
 void FileSystemManager::closeFile(File& file) {
@@ -304,7 +326,7 @@ void FileSystemManager::listHexFiles() {
   Serial.println("Available HEX files:");
   Serial.println("=====================================");
 
-  File root = LittleFS.open("/");
+  File root = SD.open("/");
   if (!root) {
     Serial.println("Failed to open root directory");
     return;

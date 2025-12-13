@@ -8,6 +8,7 @@
 #include "FxManager.h"
 #include "Splash.h"
 #include "Buttons_Sprites.h"
+#include "Icons.h"
 #include <deque>
 
 enum class Screen {
@@ -19,9 +20,9 @@ enum class Screen {
 
 class UI {
   private:
-    U8G2_SCREEN* u8g2;
-    HID* hid;
-    FxManager* fxManager;
+    U8G2_SCREEN* u8g2 = nullptr;
+    HID* hid = nullptr;
+    FxManager* fxManager = nullptr;
     uint8_t buttonsState = -1;
     Screen currentScreen = Screen::SPLASH;
 
@@ -41,6 +42,7 @@ class UI {
 
     void drawTextCenter(const char* text, int8_t x_offset = 0, int8_t y_offset = 0) const;
     void drawGameSplashScreen(const GameInfo& game, int8_t x_offset = 0, int8_t y_offset = 0) const;
+    void drawCategoryScreen(const GamesCategory& category, int8_t x_offset = 0, int8_t y_offset = 0) const;
 
     void screenButtonsTest() const;
     void splashScreen() ;

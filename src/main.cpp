@@ -5,8 +5,6 @@
 #include "SerialCLI.h"
 #include "config.h"
 
-#include "SD.h"
-#include <SPI.h>
 
 // ==========================================
 // GLOBAL OBJECTS
@@ -73,38 +71,6 @@ void setup() {
 
   Serial.println("Serial CLI initialized successfully");
 
-  //SDCARD
-  pinMode(SD_CS_PIN, OUTPUT); // SS
-
-  SPIClass sdSPI(2);
-  sdSPI.begin(SD_SCK_PIN, SD_MISO_PIN, SD_MOSI_PIN, SD_CS_PIN);
-  if (!SD.begin(SD_CS_PIN, sdSPI)) {
-    Serial.println("Nie udalo sie zainicjowac karty SD");
-  }
-
-  uint8_t cardType = SD.cardType();
-
-  switch (cardType) {
-    case CARD_NONE:
-      Serial.println("Brak karty SD");
-      break;
-    case CARD_MMC:
-      Serial.println("Karta MMC");
-      break;
-    case CARD_SD:
-      Serial.println("Karta SDSC");
-      break;
-    case CARD_SDHC:
-      Serial.println("Karta SDHC");
-      break;
-    default:
-      Serial.println("Nieznany typ karty");
-  }
-  // delay(100);
-
-  // fxManager->setMode(FxMode::MASTER);
-
-  Serial.println("Setup complete. Enter commands:");
 }
 
 void loop() {
@@ -113,11 +79,6 @@ void loop() {
   }
   if (fxManager) {
     fxManager->update();
-  }
-  if (millis() % 1000 == 0) {
-    Serial.println();
-    Serial.print("SD Card Type: ");
-    Serial.println(SD.cardType());
   }
   yield();
 }
