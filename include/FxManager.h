@@ -31,7 +31,7 @@ class FxManager {
   void reset();
   void printInfo();
 
-  GameInfo getGameInfo(const String& categoryPath = "", uint8_t offset = 0);
+  GameInfo getGameInfo(const String& categoryPath = "", uint8_t offset = 0) const;
 
   // get all categories list. Each categorry is a folder in /games
   std::array<GamesCategory, MAX_CATEGORIES> getCategories();

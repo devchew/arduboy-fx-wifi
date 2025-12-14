@@ -36,7 +36,6 @@ class UI {
 
     void screenButtonsTest() const;
     void splashScreen() ;
-    void screenFlashGame() const ;
 
   public:
     UI();
@@ -44,6 +43,7 @@ class UI {
     bool begin(U8G2_SCREEN& u8g2, HID& hid, FxManager& fxManager);
     void update();
     void setScreen(Screen screen);
+    void screenFlashGame() const ;
 };
 
 #endif //ARDUBOY_FX_WIFI_UI_H

@@ -62,8 +62,9 @@ void FxManager::update() {
     return;
   }
 
+  hid->update();
+
   if (currentMode == FxMode::MASTER) {
-    hid->update();
     ui->update();
     if (hid->pressed(Buttons::START)) {
       setMode(FxMode::GAME);
@@ -71,7 +72,6 @@ void FxManager::update() {
   }
 
   if (currentMode == FxMode::GAME) {
-    hid->update();
     if (hid->pressed(Buttons::SELECT)) {
       setMode(FxMode::MASTER);
     }
@@ -125,6 +125,7 @@ void FxManager::setMode(FxMode mode) {
     case FxMode::PROGRAMMING:
       hid->disable();
       oled->clear();
+      ui->screenFlashGame();
       oled->slave();
       oled->disable();
       delay(10);
@@ -256,17 +257,60 @@ std::array<GamesCategory, MAX_CATEGORIES> FxManager::getCategories() {
 
 }
 
-GameInfo FxManager::getGameInfo(const String &categoryPath, uint8_t offset) {
-  // mock for testing ui
+GameInfo FxManager::getGameInfo(const String &categoryPath, uint8_t offset) const {
+  if (!initialized) {
+    Serial.println("[error] FxManager not initialized");
+    return GameInfo{ "", "Error", "", "", "", ""  };
+  }
+  if (!fileSystem) {
+    Serial.println("[error] Filesystem not initialized");
+    return GameInfo{ "", "Error", "", "", "", ""  };
+  }
 
-  String cat = categoryPath.length() ? categoryPath : "All";
-  uint8_t idx = offset + 1;
-  String path = String("/games/") + cat + "/game" + String(idx) + ".hex";
-  String title = cat + " Game " + String(idx);
-  return GameInfo{path, title, "2023-01-01", "Dev", "Demo game.", "MIT"};
+  File categoryDir = fileSystem->openFile(categoryPath);
+  if (!categoryDir || !categoryDir.isDirectory()) {
+    Serial.printf("[error] Category directory not found: %s\n", categoryPath.c_str());
+    return GameInfo{ "", "Error", "", "", "", ""  };
+  }
+  uint8_t index = 0;
+  File entry = categoryDir.openNextFile();
+  while (entry) {
+    if (!entry.isDirectory()) {
+      entry = categoryDir.openNextFile();
+      continue;
+    }
+    if (index < offset) {
+      index++;
+      entry = categoryDir.openNextFile();
+      continue;
+    }
+    // Found the game path, it should be a first .hex file inside this directory
+    File gameDir = fileSystem->openFile(entry.path());
+    if (!gameDir || !gameDir.isDirectory()) {
+      Serial.printf("[error] Game directory not found: %s\n", entry.name());
+      return GameInfo{ "", "Error", "", "", "", ""  };
+    }
+    File gameFile = gameDir.openNextFile();
+    String title = String(entry.name());
+    while (gameFile) {
+      String filename = String(gameFile.name());
+      if (filename.endsWith(".hex")) {
+        // this is the hex file, exit the loop
+        break;
+      }
+      gameFile = gameFile.openNextFile();
+    }
 
-  // Placeholder implementation
-  // In a real implementation, this would read metadata from the HEX file or an associated file
+    return GameInfo{
+      gameFile ? String(gameFile.path()) : "",
+      title,
+      "",
+      gameFile ? String(gameFile.name()) : "",
+      "",
+      ""
+     };
+  }
+  return GameInfo{ "", "Error", "", "", "", ""  };
 }
 
 void FxManager::reset() {

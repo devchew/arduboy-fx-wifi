@@ -120,19 +120,6 @@ void UI::screenFlashGame() const {
 
 
 void UI::update() {
-  buttonsState = hid->getButtons();
-  if (hid->pressed(Buttons::SELECT)) {
-    setScreen(Screen::BUTTONS_TEST);
-    return;
-  }
-  if (hid->pressed(Buttons::B)) {
-    setScreen(Screen::GAME_LIST);
-    return;
-  }
-  if (hid->pressed(Buttons::A)) {
-    setScreen(Screen::FLASH_GAME);
-    return;
-  }
   switch (currentScreen) {
     case Screen::SPLASH:
       this->splashScreen();
