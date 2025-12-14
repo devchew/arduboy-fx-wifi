@@ -126,6 +126,38 @@ void SerialCLI::update() {
         }
 
 
+    if (command == "oled") {
+      if (args.length() == 0) {
+        Serial.println("Usage: oled <reset|master|slave|disable|enable>");
+        return;
+      }
+
+      args.toLowerCase();
+      if (args == "reset") {
+        fxManager->oled->reset();
+        return;
+      }
+      if (args == "master") {
+        fxManager->oled->master();
+        return;
+      }
+      if (args == "slave") {
+        fxManager->oled->slave();
+        return;
+      }
+      if (args == "enable") {
+        fxManager->oled->enable();
+        return;
+      }
+      if (args == "disable") {
+        fxManager->oled->disable();
+        return;
+      }
+      Serial.println("Invalid OLED command. Available commands: reset, master, slave");
+
+      return;
+    }
+
     if (command == "reset") {
       fxManager->reset();
       return;

@@ -68,8 +68,8 @@ bool OLEDController::slave() {
 
   isMaster = false;
 
-  // u8g2.clearDisplay();
-  // u8g2.setPowerSave(1);  // Turn off display
+  u8g2.clearDisplay();
+  u8g2.setPowerSave(1);  // Turn off display
 
   // Release control pins to allow AVR to control OLED
   pinMode(OLED_DC_PIN, INPUT);     // High-impedance DC

@@ -126,11 +126,8 @@ void FxManager::setMode(FxMode mode) {
       hid->disable();
       oled->clear();
       ui->screenFlashGame();
-      oled->slave();
       oled->disable();
       delay(10);
-      this->triStateSPIPins();
-      this->activateSPIPins();
 
       arduboy->powerOn();
       delay(50);  // allow bus and target to settle before probing
