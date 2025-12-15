@@ -4,7 +4,7 @@
 #include "FxManager.h"
 #include "SerialCLI.h"
 #include "config.h"
-
+#include<MacroLogger.h>
 
 // ==========================================
 // GLOBAL OBJECTS
@@ -19,24 +19,24 @@ FxManager* fxManager = nullptr;
 
 void initializeWiFi() {
   if (WIFI_ENABLED) {
-    Serial.println("Connecting to WiFi...");
+    Logger::info("Connecting to WiFi...");
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
     int attempts = 0;
     while (WiFi.status() != WL_CONNECTED && attempts < 20) {
       delay(500);
-      Serial.print(".");
+      Logger::info(".");
       attempts++;
     }
 
     if (WiFi.status() == WL_CONNECTED) {
-      Serial.println();
-      Serial.println("WiFi connected");
-      Serial.print("IP address: ");
-      Serial.println(WiFi.localIP());
+      Logger::info();
+      Logger::info("WiFi connected");
+      Logger::info("IP address: ");
+      // Logger::info(WiFi.localIP().toString());
     } else {
-      Serial.println();
-      Serial.println("WiFi connection failed, continuing without WiFi");
+      Logger::info();
+      Logger::info("WiFi connection failed, continuing without WiFi");
     }
   }
 }
@@ -47,29 +47,29 @@ void initializeWiFi() {
 
 void setup() {
   Serial.begin(SERIAL_BAUD_RATE);
+  Logger::set_level(Logger::Level::ERROR);
 
-  Serial.println();
-  Serial.println("Starting Arduboy FX WiFi Programmer...");
+  Logger::info("Starting Arduboy FX WiFi Programmer...");
 
   // Initialize WiFi (optional)
   // initializeWiFi();
 
   fxManager = new FxManager();
   if (!fxManager || !fxManager->begin()) {
-    Serial.println("Failed to initialize FxManager!");
+    Logger::error("Failed to initialize FxManager!");
     return;
   }
 
-  Serial.println("FxManager initialized successfully");
+  Logger::info("FxManager initialized successfully");
 
   // Initialize SerialCLI
   cli = new SerialCLI(fxManager);
   if (!cli) {
-    Serial.println("Failed to initialize Serial CLI!");
+    Logger::error("Failed to initialize Serial CLI!");
     return;
   }
 
-  Serial.println("Serial CLI initialized successfully");
+  Logger::info("Serial CLI initialized successfully");
 
 }
 

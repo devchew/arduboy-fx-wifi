@@ -18,7 +18,7 @@ HexParser::HexParser(uint32_t buffer_size)
     : buffer_size(buffer_size), flash_size(0) {
   flash_buffer = new uint8_t[buffer_size];
   if (!flash_buffer) {
-    Serial.println("Failed to allocate flash buffer");
+    Logger::error("Failed to allocate flash buffer");
     return;
   }
   clearBuffer();
@@ -44,16 +44,16 @@ void HexParser::clearBuffer() {
 bool HexParser::parseFile(File& file) {
 
   if (!flash_buffer) {
-    Serial.println("Flash buffer not allocated");
+    Logger::error("Flash buffer not allocated");
     return false;
   }
 
   if (!file) {
-    Serial.print("Failed to open file");
+    Logger::error("Failed to open file");
     return false;
   }
 
-  Serial.printf("Parsing HEX file: %s (%d bytes)\n", file.name(), file.size());
+  Logger::info("Parsing HEX file: %s (%d bytes)\n", file.name(), file.size());
 
   // Initialize HEX parser
   ihex_begin_read(&ihex_state);
@@ -68,7 +68,7 @@ bool HexParser::parseFile(File& file) {
     buffer[bytes_read] = '\0';
 
     if (!ihex_read_bytes(&ihex_state, buffer, bytes_read)) {
-      Serial.println("HEX parsing error");
+      Logger::error("HEX parsing error");
       parse_success = false;
     }
   }
@@ -77,7 +77,7 @@ bool HexParser::parseFile(File& file) {
   file.close();
 
   if (parse_success) {
-    Serial.printf("HEX file parsed successfully. Flash size: %d bytes\n",
+    Logger::info("HEX file parsed successfully. Flash size: %d bytes\n",
                    flash_size);
     printParseInfo();
   }
@@ -86,10 +86,10 @@ bool HexParser::parseFile(File& file) {
 }
 
 void HexParser::printParseInfo() const {
-  Serial.printf("Parsed HEX Info:\n");
-  Serial.printf("  Buffer size: %d bytes\n", buffer_size);
-  Serial.printf("  Flash size: %d bytes\n", flash_size);
-  Serial.printf("  Usage: %.1f%%\n", (float)flash_size * 100.0 / buffer_size);
+  Logger::info("Parsed HEX Info:\n");
+  Logger::info("  Buffer size: %d bytes\n", buffer_size);
+  Logger::info("  Flash size: %d bytes\n", flash_size);
+  Logger::info("  Usage: %.1f%%\n", (float)flash_size * 100.0 / buffer_size);
 
   // Find first and last non-0xFF bytes
   uint32_t first_byte = 0, last_byte = 0;
@@ -107,7 +107,7 @@ void HexParser::printParseInfo() const {
   }
 
   if (first_byte <= last_byte) {
-    Serial.printf("  Code range: 0x%04X - 0x%04X\n", first_byte, last_byte);
+    Logger::info("  Code range: 0x%04X - 0x%04X\n", first_byte, last_byte);
   }
 }
 
@@ -126,7 +126,7 @@ ihex_bool_t HexParser::handleParsedData(struct ihex_state* ihex,
                                         ihex_record_type_t type,
                                         ihex_bool_t checksum_error) {
   if (checksum_error) {
-    Serial.println("HEX checksum error!");
+    Logger::error("HEX checksum error!");
     return false;
   }
 
@@ -136,7 +136,7 @@ ihex_bool_t HexParser::handleParsedData(struct ihex_state* ihex,
 
       // Check if address is within flash range
       if (address + ihex->length > buffer_size) {
-        Serial.printf("Address 0x%08X exceeds buffer size\n", address);
+        Logger::error("Address 0x%08X exceeds buffer size\n", address);
         return false;
       }
 
@@ -148,12 +148,12 @@ ihex_bool_t HexParser::handleParsedData(struct ihex_state* ihex,
         flash_size = address + ihex->length;
       }
 
-      Serial.printf("Data: 0x%08X, %d bytes\n", address, ihex->length);
+      Logger::info("Data: 0x%08X, %d bytes\n", address, ihex->length);
       break;
     }
 
     case IHEX_END_OF_FILE_RECORD:
-      Serial.println("HEX file parsing complete");
+      Logger::info("HEX file parsing complete");
       break;
 
     case IHEX_EXTENDED_SEGMENT_ADDRESS_RECORD:
@@ -164,7 +164,7 @@ ihex_bool_t HexParser::handleParsedData(struct ihex_state* ihex,
       break;
 
     default:
-      Serial.printf("Unknown record type: %d\n", type);
+      Logger::info("Unknown record type: %d\n", type);
       break;
   }
 

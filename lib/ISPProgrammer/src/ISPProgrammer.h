@@ -2,6 +2,7 @@
 #define ISP_PROGRAMMER_H
 
 #include <Arduino.h>
+#include <MacroLogger.h>
 #include <SPI.h>
 
 // Device signatures

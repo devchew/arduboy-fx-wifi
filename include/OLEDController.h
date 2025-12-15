@@ -5,6 +5,7 @@
 #include <U8g2lib.h>
 #include <SPI.h>
 #include "config.h"
+#include <MacroLogger.h>
 
 class OLEDController {
  private:

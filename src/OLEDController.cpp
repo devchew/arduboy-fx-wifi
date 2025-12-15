@@ -22,7 +22,7 @@ bool OLEDController::begin() {
 
   // Don't initialize display yet - wait for master() call
   initialized = true;
-  Serial.println("OLED Controller initialized successfully");
+  Logger::info("OLED Controller initialized successfully");
   return true;
 }
 
@@ -42,7 +42,7 @@ void OLEDController::end() {
 
 bool OLEDController::reset() {
   if (!initialized) {
-    Serial.println("OLED Controller not initialized");
+    Logger::error("OLED Controller not initialized");
     return false;
   }
 
@@ -51,18 +51,18 @@ bool OLEDController::reset() {
   this->enable();
   delay(10);
 
-  Serial.println("OLED reset completed");
+  Logger::info("OLED reset completed");
   return true;
 }
 
 bool OLEDController::slave() {
   if (!initialized) {
-    Serial.println("OLED Controller not initialized");
+    Logger::error("OLED Controller not initialized");
     return false;
   }
 
   if (!isMaster) {
-    Serial.println("OLED already in SLAVE mode");
+    Logger::error("OLED already in SLAVE mode");
     return true;
   }
 
@@ -75,13 +75,13 @@ bool OLEDController::slave() {
   pinMode(OLED_DC_PIN, INPUT);     // High-impedance DC
   pinMode(OLED_RESET_PIN, INPUT);  // High-impedance RESET
 
-  Serial.println("OLED set to SLAVE mode - control pins released");
+  Logger::info("OLED set to SLAVE mode - control pins released");
   return true;
 }
 
 bool OLEDController::master() {
   if (!initialized) {
-    Serial.println("OLED Controller not initialized");
+    Logger::error("OLED Controller not initialized");
     return false;
   }
 
@@ -99,29 +99,29 @@ bool OLEDController::master() {
   u8g2.setPowerSave(0);  // Turn on display
 
   isMaster = true;
-  Serial.println("OLED set to MASTER mode - control pins reclaimed");
+  Logger::info("OLED set to MASTER mode - control pins reclaimed");
   return true;
 }
 
 bool OLEDController::enable() {
   if (!initialized) {
-    Serial.println("OLED Controller not initialized");
+    Logger::error("OLED Controller not initialized");
     return false;
   }
 
   digitalWrite(OLED_CS_PIN, LOW);  // Select OLED
-  Serial.println("OLED enabled");
+  Logger::info("OLED enabled");
   return true;
 }
 
 bool OLEDController::disable() {
   if (!initialized) {
-    Serial.println("OLED Controller not initialized");
+    Logger::error("OLED Controller not initialized");
     return false;
   }
 
   digitalWrite(OLED_CS_PIN, HIGH);  // Deselect OLED
-  Serial.println("OLED disabled");
+  Logger::info("OLED disabled");
   return true;
 }
 

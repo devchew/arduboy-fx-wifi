@@ -88,9 +88,7 @@ void HID::update() {
 
   if (newButtonsState != buttonsState) {
     buttonsState = newButtonsState;
-    Serial.println("Buttons state");
-    Serial.print("b");
-    Serial.println(buttonsState, BIN);
+    Logger::info("Buttons state changed: b%08b\n", buttonsState);
   }
 }
 

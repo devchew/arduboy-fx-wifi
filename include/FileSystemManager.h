@@ -2,6 +2,7 @@
 #define FILESYSTEMMANAGER_H
 
 #include <Arduino.h>
+#include <MacroLogger.h>
 #include "SD.h"
 #include <SPI.h>
 #include "config.h"

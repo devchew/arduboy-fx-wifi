@@ -2,6 +2,7 @@
 #define FX_MANAGER_H
 
 #include <Arduino.h>
+#include <MacroLogger.h>
 #include <SPI.h>
 
 #include <ArduboyController.h>

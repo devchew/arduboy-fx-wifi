@@ -1,0 +1,20 @@
+{
+  "name": "ArduboyController",
+  "keywords": "Controll arduboy with a microcontroller",
+  "description": "Library to control an Arduboy with a microcontroller via serial commands.",
+  "version": "0.0.1",
+  "authors": {
+    "name": "DevChew",
+    "url": "https://github.com/devchew",
+    "maintainer": true
+  },
+  "frameworks": ["arduino"],
+  "platforms": "*",
+  "examples": "examples/*/*.ino",
+  "dependencies": [
+    {
+      "name": "MacroLogger",
+      "version": "https://github.com/Incuvers/macro-logger"
+    }
+  ]
+}

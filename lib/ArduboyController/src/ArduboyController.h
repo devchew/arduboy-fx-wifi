@@ -2,7 +2,7 @@
 #define ARDUBOY_CONTROLLER_H
 
 #include <Arduino.h>
-
+#include <MacroLogger.h>
 #include <HexParser.h>
 #include <ISPProgrammer.h>
 #include <FS.h>

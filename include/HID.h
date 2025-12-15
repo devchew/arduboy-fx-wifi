@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include "config.h"
+#include <MacroLogger.h>
 
 enum class Buttons {
   UP,

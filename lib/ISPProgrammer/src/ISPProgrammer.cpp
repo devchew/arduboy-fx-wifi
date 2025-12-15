@@ -54,7 +54,7 @@ bool ISPProgrammer::enterProgrammingMode() {
     SPI.transfer(0x00);
 
     if (response == 0x53) {
-      Serial.println("Programming mode enabled");
+      Logger::info("Programming mode enabled");
       return detectDevice();
     }
 
@@ -65,7 +65,7 @@ bool ISPProgrammer::enterProgrammingMode() {
     delayMicroseconds(10);
   }
 
-  Serial.println("Failed to enable programming mode");
+  Logger::info("Failed to enable programming mode");
   return false;
 }
 
@@ -108,7 +108,7 @@ bool ISPProgrammer::detectDevice() {
     current_device.flash_size = 32768;           // Default
     current_device.uses_word_addressing = true;  // Default
     device_detected = false;
-    Serial.printf("Warning: Unknown device signature: 0x%02X 0x%02X 0x%02X\n",
+    Logger::error("Warning: Unknown device signature: 0x%02X 0x%02X 0x%02X\n",
                    sig[0], sig[1], sig[2]);
   }
 
@@ -118,7 +118,7 @@ bool ISPProgrammer::detectDevice() {
 bool ISPProgrammer::eraseChip() {
   if (!device_detected) return false;
 
-  Serial.println("Erasing chip...");
+  Logger::info("Erasing chip...");
 
   // Send chip erase command
   spiTransaction(0xAC, 0x80, 0x00, 0x00);
@@ -132,7 +132,7 @@ bool ISPProgrammer::eraseChip() {
 bool ISPProgrammer::programFlash(const uint8_t* data, uint32_t size) {
   if (!device_detected || !data) return false;
 
-  Serial.println("Programming flash...");
+  Logger::info("Programming flash...");
 
   uint32_t page_size = current_device.page_size;
   uint32_t pages = (size + page_size - 1) / page_size;
@@ -151,7 +151,7 @@ bool ISPProgrammer::programFlash(const uint8_t* data, uint32_t size) {
     }
 
     if (has_data) {
-      Serial.printf("Programming page %d (0x%04X)\n", page, addr);
+      Logger::info("Programming page %d (0x%04X)\n", page, addr);
 
       // Load page buffer
       for (uint32_t i = 0; i < page_size && (addr + i) < size; i += 2) {
@@ -186,7 +186,7 @@ bool ISPProgrammer::programFlash(const uint8_t* data, uint32_t size) {
   }
 
   showProgress(pages, pages, "Programming");
-  Serial.println("Flash programming complete");
+  Logger::info("Flash programming complete");
 
   // Verify flash
   return verifyFlash(data, size);
@@ -195,7 +195,7 @@ bool ISPProgrammer::programFlash(const uint8_t* data, uint32_t size) {
 bool ISPProgrammer::verifyFlash(const uint8_t* data, uint32_t size) {
   if (!data) return false;
 
-  Serial.println("Verifying flash...");
+  Logger::info("Verifying flash...");
   bool verify_ok = true;
 
   for (uint32_t addr = 0; addr < size; addr += 2) {
@@ -211,7 +211,7 @@ bool ISPProgrammer::verifyFlash(const uint8_t* data, uint32_t size) {
 
     // Compare with expected data
     if (data[addr] != low_byte) {
-      Serial.printf(
+      Logger::error(
           "Verify error at 0x%04X: expected 0x%02X, got 0x%02X (low)\n", addr,
           data[addr], low_byte);
       verify_ok = false;
@@ -219,7 +219,7 @@ bool ISPProgrammer::verifyFlash(const uint8_t* data, uint32_t size) {
     }
 
     if (addr + 1 < size && data[addr + 1] != high_byte) {
-      Serial.printf(
+      Logger::error(
           "Verify error at 0x%04X: expected 0x%02X, got 0x%02X (high)\n",
           addr + 1, data[addr + 1], high_byte);
       verify_ok = false;
@@ -233,9 +233,9 @@ bool ISPProgrammer::verifyFlash(const uint8_t* data, uint32_t size) {
   }
 
   if (verify_ok) {
-    Serial.println("Flash verification successful!");
+    Logger::info("Flash verification successful!");
   } else {
-    Serial.println("Flash verification failed!");
+    Logger::error("Flash verification failed!");
   }
 
   return verify_ok;
@@ -245,26 +245,26 @@ void ISPProgrammer::showProgress(uint32_t current, uint32_t total,
                                  const char* operation) {
   if (total == 0) return;
   uint32_t percent = (current * 100) / total;
-  Serial.printf("%s progress: %d%%\n", operation, percent);
+  Logger::info("%s progress: %d%%\n", operation, percent);
 }
 
 void ISPProgrammer::printDeviceInfo() const {
-  Serial.printf("Device signature: 0x%02X 0x%02X 0x%02X\n",
+  Logger::info("Device signature: 0x%02X 0x%02X 0x%02X\n",
                  current_device.signature[0], current_device.signature[1],
                  current_device.signature[2]);
-  Serial.printf("Device: %s\n", current_device.name.c_str());
+  Logger::info("Device: %s\n", current_device.name.c_str());
 
   if (device_detected) {
-    Serial.printf("Page size: %d bytes\n", current_device.page_size);
-    Serial.printf("Flash size: %d bytes\n", current_device.flash_size);
-    Serial.printf("Addressing: %s\n",
+    Logger::info("Page size: %d bytes\n", current_device.page_size);
+    Logger::info("Flash size: %d bytes\n", current_device.flash_size);
+    Logger::info("Addressing: %s\n",
                    current_device.uses_word_addressing ? "Word" : "Byte");
   }
 }
 
 void ISPProgrammer::printFuses() {
   if (!device_detected) {
-    Serial.println("Device not detected or not in programming mode");
+    Logger::error("Device not detected or not in programming mode");
     return;
   }
 
@@ -273,7 +273,7 @@ void ISPProgrammer::printFuses() {
   uint8_t hfuse = spiTransaction(0x58, 0x08, 0x00, 0x00);
   uint8_t efuse = spiTransaction(0x50, 0x08, 0x00, 0x00);
 
-  Serial.printf("Fuses - Low: 0x%02X, High: 0x%02X, Extended: 0x%02X\n", lfuse,
+  Logger::info("Fuses - Low: 0x%02X, High: 0x%02X, Extended: 0x%02X\n", lfuse,
                  hfuse, efuse);
 }
 

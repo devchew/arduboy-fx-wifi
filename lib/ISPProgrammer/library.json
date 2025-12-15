@@ -1,0 +1,20 @@
+{
+  "name": "ISPProgrammer",
+  "keywords": "In-System Programming for microcontrollers",
+  "description": "Library to program microcontrollers via ISP using a microcontroller as the programmer",
+  "version": "0.0.1",
+  "authors": {
+    "name": "DevChew",
+    "url": "https://github.com/devchew",
+    "maintainer": true
+  },
+  "frameworks": ["arduino"],
+  "platforms": "*",
+  "examples": "examples/*/*.ino",
+  "dependencies": [
+    {
+      "name": "MacroLogger",
+      "version": "https://github.com/Incuvers/macro-logger"
+    }
+  ]
+}

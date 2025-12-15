@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include <FS.h>
-
+#include <MacroLogger.h>
 #include "kk_ihex_read.h"
 
 class HexParser {

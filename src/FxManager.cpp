@@ -21,33 +21,33 @@ bool FxManager::begin() {
   // Initialize FileSystem
   fileSystem = new FileSystemManager();
   if (!fileSystem->begin()) {
-    Serial.println("Failed to initialize filesystem!");
+    Logger::error("Failed to initialize filesystem!");
     return false;
   }
 
   // Initialize ArduboyController
   arduboy = new ArduboyController();
   if (!arduboy->begin(ISP_RESET_PIN, HEX_BUFFER_SIZE)) {
-    Serial.println("Failed to initialize ArduboyController!");
+    Logger::error("Failed to initialize ArduboyController!");
     return false;
   }
 
   hid = new HID();
   if (!hid->begin()) {
-    Serial.println("Failed to initialize HID!");
+    Logger::error("Failed to initialize HID!");
     return false;
   }
 
   // Initialize OLEDController
   oled = new OLEDController();
   if (!oled->begin()) {
-    Serial.println("Failed to initialize OLEDController!");
+    Logger::error("Failed to initialize OLEDController!");
     return false;
   }
 
   ui = new UI();
   if (!ui->begin(oled->u8g2, *hid, *this)) {
-    Serial.println("Failed to initialize UI!");
+    Logger::error("Failed to initialize UI!");
     return false;
   }
 
@@ -80,7 +80,7 @@ void FxManager::update() {
 
 void FxManager::setMode(FxMode mode) {
   if (!initialized) {
-    Serial.println("[error] FxManager not initialized");
+    Logger::error("FxManager not initialized");
     return;
   }
 
@@ -102,7 +102,7 @@ void FxManager::setMode(FxMode mode) {
       // Finally power on AVR
       arduboy->powerOn();
 
-      Serial.println("Switched to GAME mode");
+      Logger::info("Switched to GAME mode");
       break;
     case FxMode::MASTER:
       // First power off AVR to prevent conflicts
@@ -120,7 +120,7 @@ void FxManager::setMode(FxMode mode) {
       oled->enable();
       delay(50);  // Give extra time for display initialization
 
-      Serial.println("Switched to MASTER mode");
+      Logger::info("Switched to MASTER mode");
       break;
     case FxMode::PROGRAMMING:
       hid->disable();
@@ -131,22 +131,22 @@ void FxManager::setMode(FxMode mode) {
 
       arduboy->powerOn();
       delay(50);  // allow bus and target to settle before probing
-      Serial.println("Switched to PROGRAMMING mode");
+      Logger::info("Switched to PROGRAMMING mode");
       break;
   }
 }
 
 void FxManager::flashGame(const String& filename) {
   if (!initialized) {
-    Serial.println("[error] FxManager not initialized");
+    Logger::error("FxManager not initialized");
     return;
   }
 
   setMode(FxMode::PROGRAMMING);
 
   if (filename.length() == 0) {
-    Serial.println("[error] Usage: flash <filename>");
-    Serial.println("Available HEX files:");
+    Logger::error("Usage: flash <filename>");
+    Logger::error("Available HEX files:");
     if (fileSystem) {
       fileSystem->listHexFiles();
     }
@@ -156,33 +156,33 @@ void FxManager::flashGame(const String& filename) {
   String filepath = filename.startsWith("/") ? filename : "/" + filename;
 
   if (!fileSystem || !fileSystem->fileExists(filepath)) {
-    Serial.println("[error] File not found: " + filepath);
+    Logger::error("File not found: %s\n" , filepath.c_str());
     return;
   }
 
   if (!fileSystem->isValidHexFile(filepath)) {
-    Serial.println("[error] Invalid HEX file: " + filepath);
+    Logger::error("Invalid HEX file: %s\n" , filepath.c_str());
     return;
   }
 
   if (!arduboy || !arduboy->checkConnection()) {
-    Serial.println("[error] Arduboy not connected");
+    Logger::error("Arduboy not connected");
     return;
   }
 
   File file = fileSystem->openFile(filepath);
   if (!file) {
-    Serial.println("[error] Failed to open file: " + filepath);
+    Logger::error("Failed to open file: %s\n" , filepath.c_str());
     return;
   }
 
-  Serial.println("Starting flash operation...");
+  Logger::info("Starting flash operation...");
   bool success = arduboy->flash(file);
 
   if (success) {
-    Serial.println("[success] Flash completed successfully!");
+    Logger::info("Flash completed successfully!");
   } else {
-    Serial.println("[error] Flash operation failed");
+    Logger::error("Flash operation failed");
   }
 
   setMode(FxMode::GAME);
@@ -193,18 +193,18 @@ std::array<GamesCategory, MAX_CATEGORIES> FxManager::getCategories() {
 
   std::array<GamesCategory, MAX_CATEGORIES> categories = {};
   if (!initialized) {
-    Serial.println("[error] FxManager not initialized");
+    Logger::error("FxManager not initialized");
     return categories;
   }
 
   if (!fileSystem) {
-    Serial.println("[error] Filesystem not initialized");
+    Logger::error("Filesystem not initialized");
     return categories;
   }
 
   File gamesDir = fileSystem->openFile(gamesRoot);
   if (!gamesDir || !gamesDir.isDirectory()) {
-    Serial.printf("[error] Games directory not found: %s\n", gamesRoot.c_str());
+    Logger::error("Games directory not found: %s\n", gamesRoot.c_str());
     return categories;
   }
 
@@ -212,7 +212,7 @@ std::array<GamesCategory, MAX_CATEGORIES> FxManager::getCategories() {
   File entry = gamesDir.openNextFile();
   while (entry && index < MAX_CATEGORIES) {
     if (!entry.isDirectory()) {
-      Serial.printf("[FILE skipped] %s (%u bytes)\n", entry.name(), entry.size());
+      Logger::info("[FILE skipped] %s (%u bytes)\n", entry.name(), entry.size());
       entry = gamesDir.openNextFile();
       continue;
     }
@@ -229,21 +229,21 @@ std::array<GamesCategory, MAX_CATEGORIES> FxManager::getCategories() {
     categories[index].categoryPath = subPath;
     categories[index].gameCount = 0;
 
-    Serial.printf("[DIR CAT] %s/ %s\n", entry.name(), subPath.c_str());
+    Logger::info("[DIR CAT] %s/ %s\n", entry.name(), subPath.c_str());
 
     // Count games in this category
     File subRoot = fileSystem->openFile(subPath);
     if (subRoot) {
       File subFile = subRoot.openNextFile();
       while (subFile) {
-        Serial.printf("[DIR GAME]  %s/\n", subFile.name());
+        Logger::info("[DIR GAME]  %s/\n", subFile.name());
         categories[index].gameCount++;
         subFile.close();
         subFile = subRoot.openNextFile();
       }
       subRoot.close();
     } else {
-      Serial.printf("Failed to open subdirectory: %s\n", subPath.c_str());
+      Logger::error("Failed to open subdirectory: %s\n", subPath.c_str());
     }
 
     index++;
@@ -256,17 +256,17 @@ std::array<GamesCategory, MAX_CATEGORIES> FxManager::getCategories() {
 
 GameInfo FxManager::getGameInfo(const String &categoryPath, uint8_t offset) const {
   if (!initialized) {
-    Serial.println("[error] FxManager not initialized");
+    Logger::error("FxManager not initialized");
     return GameInfo{ "", "Error", "", "", "", ""  };
   }
   if (!fileSystem) {
-    Serial.println("[error] Filesystem not initialized");
+    Logger::error("Filesystem not initialized");
     return GameInfo{ "", "Error", "", "", "", ""  };
   }
 
   File categoryDir = fileSystem->openFile(categoryPath);
   if (!categoryDir || !categoryDir.isDirectory()) {
-    Serial.printf("[error] Category directory not found: %s\n", categoryPath.c_str());
+    Logger::error("Category directory not found: %s\n", categoryPath.c_str());
     return GameInfo{ "", "Error", "", "", "", ""  };
   }
   uint8_t index = 0;
@@ -284,7 +284,7 @@ GameInfo FxManager::getGameInfo(const String &categoryPath, uint8_t offset) cons
     // Found the game path, it should be a first .hex file inside this directory
     File gameDir = fileSystem->openFile(entry.path());
     if (!gameDir || !gameDir.isDirectory()) {
-      Serial.printf("[error] Game directory not found: %s\n", entry.name());
+      Logger::error("Game directory not found: %s\n", entry.name());
       return GameInfo{ "", "Error", "", "", "", ""  };
     }
     File gameFile = gameDir.openNextFile();
@@ -312,7 +312,7 @@ GameInfo FxManager::getGameInfo(const String &categoryPath, uint8_t offset) cons
 
 void FxManager::reset() {
   if (!initialized) {
-    Serial.println("[error] FxManager not initialized");
+    Logger::error("FxManager not initialized");
     return;
   }
 
@@ -321,15 +321,15 @@ void FxManager::reset() {
   }
 
   if (arduboy->reset()) {
-    Serial.println("[success] Arduboy reset successfully");
+    Logger::info("[success] Arduboy reset successfully");
   } else {
-    Serial.println("[error] Failed to reset Arduboy");
+    Logger::error("Failed to reset Arduboy");
   }
 }
 
 void FxManager::printInfo() {
   if (!initialized) {
-    Serial.println("[error] FxManager not initialized");
+    Logger::error("FxManager not initialized");
     return;
   }
 
@@ -340,16 +340,16 @@ void FxManager::printInfo() {
   if (arduboy) {
     arduboy->printDeviceInfo();
   } else {
-    Serial.println("[error] ArduboyController not initialized");
+    Logger::error("ArduboyController not initialized");
   }
 
   if (oled) {
-    oled->isInitialized() ? Serial.println("OLEDController initialized")
-                          : Serial.println("OLEDController not initialized");
-    oled->isMasterMode() ? Serial.println("OLEDController in MASTER mode")
-                         : Serial.println("OLEDController in SLAVE mode");
+    oled->isInitialized() ? Logger::info("OLEDController initialized")
+                          : Logger::info("OLEDController not initialized");
+    oled->isMasterMode() ? Logger::info("OLEDController in MASTER mode")
+                         : Logger::info("OLEDController in SLAVE mode");
   } else {
-    Serial.println("[error] OLEDController not initialized");
+    Logger::error("OLEDController not initialized");
   }
 
   this->setMode(FxMode::MASTER);

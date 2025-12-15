@@ -21,14 +21,14 @@ bool ArduboyController::begin(uint8_t pinReset, uint32_t hexBufferSize) {
   // Initialize HEX parser
   hexParser = new HexParser(hexBufferSize);
   if (!hexParser) {
-    Serial.println("Failed to create HEX parser");
+    Logger::error("Failed to create HEX parser");
     return false;
   }
 
   // Initialize ISP programmer (using default hardware SPI pins)
   ispProgrammer = new ISPProgrammer(this->pinReset);
   if (!ispProgrammer) {
-    Serial.println("Failed to create ISP programmer");
+    Logger::error("Failed to create ISP programmer");
     delete hexParser;
     hexParser = nullptr;
     return false;
@@ -52,21 +52,21 @@ void ArduboyController::end() {
 
 bool ArduboyController::checkConnection() {
   if (!initialized || !ispProgrammer) {
-    Serial.println("ArduboyController not initialized");
+    Logger::error("ArduboyController not initialized");
     return false;
   }
 
   if (!ispProgrammer->begin()) {
-    Serial.println("Failed to initialize ISP programmer");
+    Logger::error("Failed to initialize ISP programmer");
     return false;
   }
 
   bool connected = ispProgrammer->enterProgrammingMode();
   if (connected) {
-    Serial.println("Arduboy connected successfully");
+    Logger::info("Arduboy connected successfully");
     ispProgrammer->exitProgrammingMode();
   } else {
-    Serial.println("Failed to connect to Arduboy device");
+    Logger::error("Failed to connect to Arduboy device");
   }
 
   ispProgrammer->end();
@@ -75,32 +75,32 @@ bool ArduboyController::checkConnection() {
 
 bool ArduboyController::flash(File& file) {
   if (!initialized || !hexParser || !ispProgrammer) {
-    Serial.println("ArduboyController not initialized");
+    Logger::error("ArduboyController not initialized");
     return false;
   }
 
-  Serial.printf("Flashing Arduboy with: %s\n", file.name());
+  Logger::info("Flashing Arduboy with: %s\n", file.name());
 
   if (!file) {
-    Serial.println("Failed to open HEX file");
+    Logger::error("Failed to open HEX file");
     return false;
   }
 
   // Parse HEX file
   if (!hexParser->parseFile(file)) {
-    Serial.println("Failed to parse HEX file");
+    Logger::error("Failed to parse HEX file");
     return false;
   }
 
   // Initialize ISP programmer
   if (!ispProgrammer->begin()) {
-    Serial.println("Failed to initialize ISP programmer");
+    Logger::error("Failed to initialize ISP programmer");
     return false;
   }
 
   // Enter programming mode
   if (!ispProgrammer->enterProgrammingMode()) {
-    Serial.println("Failed to enter programming mode");
+    Logger::error("Failed to enter programming mode");
     ispProgrammer->end();
     return false;
   }
@@ -120,9 +120,9 @@ bool ArduboyController::flash(File& file) {
   ispProgrammer->end();
 
   if (success) {
-    Serial.println("Flashing successful!");
+    Logger::info("Flashing successful!");
   } else {
-    Serial.println("Flashing failed!");
+    Logger::error("Flashing failed!");
   }
 
   return success;
@@ -130,25 +130,25 @@ bool ArduboyController::flash(File& file) {
 
 bool ArduboyController::reset() {
   // Trigger reset by toggling reset pin
-  Serial.println("Resetting Arduboy...");
+  Logger::info("Resetting Arduboy...");
 
   this->powerOff();
   delay(100);
   this->powerOn();
   delay(100);
 
-  Serial.println("Reset complete");
+  Logger::info("Reset complete");
   return true;
 }
 
 void ArduboyController::printDeviceInfo() {
   if (!initialized || !ispProgrammer) {
-    Serial.println("ArduboyController not initialized");
+    Logger::error("ArduboyController not initialized");
     return;
   }
 
   if (!ispProgrammer->begin()) {
-    Serial.println("Failed to initialize ISP programmer");
+    Logger::error("Failed to initialize ISP programmer");
     return;
   }
 
@@ -157,29 +157,29 @@ void ArduboyController::printDeviceInfo() {
     ispProgrammer->printFuses();
     ispProgrammer->exitProgrammingMode();
   } else {
-    Serial.println("Failed to enter programming mode");
+    Logger::error("Failed to enter programming mode");
   }
 
   ispProgrammer->end();
 }
 
 bool ArduboyController::powerOn() {
-  Serial.println("Powering on Arduboy...");
+  Logger::info("Powering on Arduboy...");
 
   digitalWrite(this->pinReset, HIGH);
 
   // Give some time for power to stabilize
   delay(100);
 
-  Serial.println("Arduboy powered on");
+  Logger::info("Arduboy powered on");
   return true;
 }
 
 bool ArduboyController::powerOff() {
-  Serial.println("Powering off Arduboy...");
+  Logger::info("Powering off Arduboy...");
 
   digitalWrite(this->pinReset, LOW);
 
-  Serial.println("Arduboy powered off");
+  Logger::info("Arduboy powered off");
   return true;
 }

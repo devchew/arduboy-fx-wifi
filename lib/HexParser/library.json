@@ -1,0 +1,20 @@
+{
+  "name": "HexParser",
+  "keywords": "Parse hex files for programming",
+  "description": "Library to parse Intel HEX files for programming microcontrollers.",
+  "version": "0.0.1",
+  "authors": {
+    "name": "DevChew",
+    "url": "https://github.com/devchew",
+    "maintainer": true
+  },
+  "frameworks": ["arduino"],
+  "platforms": "*",
+  "examples": "examples/*/*.ino",
+  "dependencies": [
+    {
+      "name": "MacroLogger",
+      "version": "https://github.com/Incuvers/macro-logger"
+    }
+  ]
+}

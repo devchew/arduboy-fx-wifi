@@ -17,17 +17,17 @@ bool FileSystemManager::begin() {
   sdSPI = new SPIClass(2);
   sdSPI->begin(SD_SCK_PIN, SD_MISO_PIN, SD_MOSI_PIN, SD_CS_PIN);
   if (!SD.begin(SD_CS_PIN, *sdSPI)) {
-    Serial.println("Nie udalo sie zainicjowac karty SD");
+    Logger::error("Nie udalo sie zainicjowac karty SD");
     return false;
   }
 
   if (SD.cardType() == CARD_NONE) {
-    Serial.println("Brak karty SD");
+    Logger::error("Brak karty SD");
     return false;
   }
 
   initialized = true;
-  Serial.println("FileSystem initialized successfully");
+  Logger::info("FileSystem initialized successfully");
   return true;
 }
 
@@ -44,24 +44,24 @@ void FileSystemManager::end() {
 
 void FileSystemManager::listDirectory(const String& path, uint8_t maxLevels) {
   if (!initialized) {
-    Serial.println("FileSystem not initialized");
+    Logger::error("FileSystem not initialized");
     return;
   }
 
   File root = SD.open(path);
   if (!root) {
-    Serial.printf("Failed to open directory: %s\n", path.c_str());
+    Logger::error("Failed to open directory: %s\n", path.c_str());
     return;
   }
 
   if (!root.isDirectory()) {
-    Serial.printf("Path is not a directory: %s\n", path.c_str());
+    Logger::info("Path is not a directory: %s\n", path.c_str());
     root.close();
     return;
   }
 
-  Serial.printf("Listing directory: %s\n", path.c_str());
-  Serial.println("=====================================");
+  Logger::info("Listing directory: %s\n", path.c_str());
+  Logger::info("=====================================");
 
   File file = root.openNextFile();
   while (file) {
@@ -88,14 +88,14 @@ void FileSystemManager::listDirectory(const String& path, uint8_t maxLevels) {
         }
         subRoot.close();
       } else {
-        Serial.printf("Failed to open subdirectory: %s\n", subPath.c_str());
+        Logger::info("Failed to open subdirectory: %s\n", subPath.c_str());
       }
     }
     file.close();
     file = root.openNextFile();
   }
   root.close();
-  Serial.println("=====================================");
+  Logger::info("=====================================");
 }
 
 bool FileSystemManager::createDirectory(const String& path) {
@@ -156,7 +156,7 @@ String FileSystemManager::readFile(const String& path) {
 
   File file = openFile(path, "r");
   if (!file) {
-    Serial.printf("Failed to open file for reading: %s\n", path.c_str());
+    Logger::info("Failed to open file for reading: %s\n", path.c_str());
     return "";
   }
 
@@ -172,13 +172,13 @@ bool FileSystemManager::writeFile(const String& path, const String& content) {
 
   // Overwrite: remove existing then open for write
   if (SD.exists(path)) {
-    Serial.printf("File exists: %s\n", path.c_str());
+    Logger::info("File exists: %s\n", path.c_str());
     return false;
   }
 
   File file = openFile(path, "w");
   if (!file) {
-    Serial.printf("Failed to open file for writing: %s\n", path.c_str());
+    Logger::info("Failed to open file for writing: %s\n", path.c_str());
     return false;
   }
 
@@ -194,7 +194,7 @@ bool FileSystemManager::appendFile(const String& path, const String& content) {
 
   File file = openFile(path, "a");
   if (!file) {
-    Serial.printf("Failed to open file for appending: %s\n", path.c_str());
+    Logger::info("Failed to open file for appending: %s\n", path.c_str());
     return false;
   }
 
@@ -229,34 +229,34 @@ bool FileSystemManager::copyFile(const String& sourcePath, const String& destPat
 
 void FileSystemManager::getInfo() {
   if (!initialized) {
-    Serial.println("FileSystem not initialized");
+    Logger::error("FileSystem not initialized");
     return;
   }
 
   auto cardType = SD.cardType();
-  Serial.println("=====================================");
-  Serial.println("FILESYSTEM INFO");
-  Serial.println("=====================================");
-  Serial.print("Card Type: ");
+  Logger::info("=====================================");
+  Logger::info("FILESYSTEM INFO");
+  Logger::info("=====================================");
+  Logger::info("Card Type: ");
   switch (cardType) {
     case CARD_MMC:
-      Serial.println("MMC");
+      Logger::info("MMC");
       break;
     case CARD_SD:
-      Serial.println("SDSC");
+      Logger::info("SDSC");
       break;
     case CARD_SDHC:
-      Serial.println("SDHC");
+      Logger::info("SDHC");
       break;
     case CARD_UNKNOWN:
     default:
-      Serial.println("UNKNOWN");
+      Logger::info("UNKNOWN");
       break;
   }
 
   uint32_t cardSizeMB = (uint32_t)(SD.cardSize() / (1024ULL * 1024ULL));
-  Serial.printf("Card Size: %u MB\n", cardSizeMB);
-  Serial.println("=====================================");
+  Logger::info("Card Size: %u MB\n", cardSizeMB);
+  Logger::info("=====================================");
 }
 
 // ==========================================
@@ -319,16 +319,16 @@ bool FileSystemManager::isValidHexFile(const String& path) {
 
 void FileSystemManager::listHexFiles() {
   if (!initialized) {
-    Serial.println("FileSystem not initialized");
+    Logger::error("FileSystem not initialized");
     return;
   }
 
-  Serial.println("Available HEX files:");
-  Serial.println("=====================================");
+  Logger::info("Available HEX files:");
+  Logger::info("=====================================");
 
   File root = SD.open("/");
   if (!root) {
-    Serial.println("Failed to open root directory");
+    Logger::error("Failed to open root directory");
     return;
   }
 
@@ -338,7 +338,7 @@ void FileSystemManager::listHexFiles() {
     String filename = String(file.name());
     if (filename.endsWith(".hex")) {
       foundHex = true;
-      Serial.printf("  %s (%u bytes)\n", filename.c_str(), file.size());
+      Logger::info("  %s (%u bytes)\n", filename.c_str(), file.size());
     }
     file.close();
     file = root.openNextFile();
@@ -346,9 +346,9 @@ void FileSystemManager::listHexFiles() {
   root.close();
 
   if (!foundHex) {
-    Serial.println("  No HEX files found");
+    Logger::info("  No HEX files found");
   }
-  Serial.println("=====================================");
+  Logger::info("=====================================");
 }
 
 // ==========================================
@@ -362,8 +362,8 @@ void FileSystemManager::printFileInfo(File file, int level) {
   }
 
   if (file.isDirectory()) {
-    Serial.printf("[DIR]  %s/\n", file.name());
+    Logger::info("[DIR]  %s/\n", file.name());
   } else {
-    Serial.printf("[FILE] %s (%u bytes)\n", file.name(), file.size());
+    Logger::info("[FILE] %s (%u bytes)\n", file.name(), file.size());
   }
 }
