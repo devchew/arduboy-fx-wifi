@@ -170,3 +170,62 @@ ihex_bool_t HexParser::handleParsedData(struct ihex_state* ihex,
 
   return true;
 }
+
+// Apply a modifier callback to the internal flash buffer.
+bool HexParser::modifyBuffer(HexParser::buffer_modifier_t modifier, void* ctx) {
+  if (!flash_buffer || !modifier) return false;
+  // modifier can inspect buffer_size and flash_size
+  return modifier(flash_buffer, buffer_size, flash_size, ctx);
+}
+
+// Write the parser's internal flash buffer as Intel HEX to an Arduino File
+bool HexParser::writeHexFile(File& file) const {
+  if (!file) {
+    Logger::error("Output file is not open");
+    return false;
+  }
+  const uint32_t WRITE_RECORD_SIZE = 16;
+  char line[128];
+
+  uint32_t i = 0;
+  while (i < buffer_size) {
+    // skip 0xFF runs
+    while (i < buffer_size && flash_buffer[i] == 0xFF) ++i;
+    if (i >= buffer_size) break;
+    uint32_t runStart = i;
+    uint32_t runLen = 0;
+    while (i < buffer_size && flash_buffer[i] != 0xFF && runLen < 0xFFFF) { ++i; ++runLen; }
+
+    uint32_t written = 0;
+    while (written < runLen) {
+      uint32_t chunk = (runLen - written) > WRITE_RECORD_SIZE ? WRITE_RECORD_SIZE : (runLen - written);
+      uint16_t addr = (uint16_t)(runStart + written);
+      int hdrlen = snprintf(line, sizeof(line), ":%02X%04X%02X", (int)chunk, (int)addr, 0);
+      if (hdrlen < 0) return false;
+      size_t pos = (size_t)hdrlen;
+      // append data bytes
+      for (uint32_t k = 0; k < chunk; ++k) {
+        int w = snprintf(line + pos, sizeof(line) - pos, "%02X", (int)flash_buffer[runStart + written + k]);
+        if (w < 0) return false;
+        pos += (size_t)w;
+      }
+      // compute checksum
+      uint32_t sum = 0;
+      sum += (uint8_t)chunk;
+      sum += (uint8_t)((addr >> 8) & 0xFF);
+      sum += (uint8_t)(addr & 0xFF);
+      sum += 0x00; // record type
+      for (uint32_t k = 0; k < chunk; ++k) sum += flash_buffer[runStart + written + k];
+      uint8_t csum = (uint8_t)((~(sum & 0xFF) + 1) & 0xFF);
+      int w = snprintf(line + pos, sizeof(line) - pos, "%02X", (int)csum);
+      if (w < 0) return false;
+      // write line
+      file.print(line);
+      file.println();
+      written += chunk;
+    }
+  }
+  // EOF
+  file.println(":00000001FF");
+  return true;
+}

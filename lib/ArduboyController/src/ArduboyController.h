@@ -9,10 +9,10 @@
 
 class ArduboyController {
  private:
-  HexParser* hexParser;
-  ISPProgrammer* ispProgrammer;
-  bool initialized;
-  uint8_t pinReset;
+  HexParser* hexParser = nullptr;
+  ISPProgrammer* ispProgrammer = nullptr;
+  bool initialized = false;
+  uint8_t pinReset = 0;
 
  public:
   ArduboyController();

@@ -1,11 +1,30 @@
 #include "ArduboyController.h"
 
-
-ArduboyController::ArduboyController() {
-  hexParser = nullptr;
-  ispProgrammer = nullptr;
-  initialized = false;
+static bool oledSSD1309Patch(uint8_t* buf, uint32_t buf_size, uint32_t flash_size, void* ctx) {
+  if (!buf) return false;
+  static const uint8_t default_lcdBootProgram[] = {
+    0xD5, 0xF0, 0x8D, 0x14, 0xA1, 0xC8, 0x81, 0xCF, 0xD9, 0xF1, 0xAF, 0x20, 0x00
+};
+  static constexpr size_t default_lcdBootProgram_len =
+      sizeof(default_lcdBootProgram) / sizeof(default_lcdBootProgram[0]);
+  for (uint32_t i = 0; i + default_lcdBootProgram_len <= buf_size; ++i) {
+    bool ok = true;
+    for (size_t j = 0; j < default_lcdBootProgram_len; ++j) {
+      if (buf[i + j] != default_lcdBootProgram[j]) { ok = false; break; }
+    }
+    if (ok) {
+      if ((size_t)i + 3 < buf_size) {
+        buf[i + 2] = 0xE3;
+        buf[i + 3] = 0xE3;
+        return true;
+      }
+      return false;
+    }
+  }
+  return false;
 }
+
+ArduboyController::ArduboyController() {}
 
 ArduboyController::~ArduboyController() { end(); }
 
@@ -89,6 +108,12 @@ bool ArduboyController::flash(File& file) {
   // Parse HEX file
   if (!hexParser->parseFile(file)) {
     Logger::error("Failed to parse HEX file");
+    return false;
+  }
+
+  // Apply OLED patch if needed
+  if (!hexParser->modifyBuffer(oledSSD1309Patch, nullptr)) {
+    Logger::error("Failed to apply OLED patch to HEX file");
     return false;
   }
 

@@ -36,6 +36,17 @@ class HexParser {
   static ihex_bool_t ihex_data_callback(struct ihex_state* ihex,
                                         ihex_record_type_t type,
                                         ihex_bool_t checksum_error);
+
+  // Buffer modifier callback: modifier receives pointer to the parser's
+  // internal flash buffer, the total buffer size and the current used flash_size
+  // and optional user context. Return true on success.
+  typedef bool (*buffer_modifier_t)(uint8_t* buf, uint32_t buf_size, uint32_t flash_size, void* ctx);
+
+  // Apply a modifier callback to the internal flash buffer.
+  bool modifyBuffer(buffer_modifier_t modifier, void* ctx);
+
+  // Write the parser's internal flash buffer as an Intel HEX file to an Arduino File.
+  bool writeHexFile(File& file) const;
 };
 
 #endif  // HEX_PARSER_H
