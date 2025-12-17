@@ -13,4 +13,4 @@ Main goal is to connect the esp to the Arduboy via SPI, and be able to upload ga
 
 ## Wiring
 
-![Wiring diagram](docs/Schematic_arduboy-fx-wifi_2025-10-12.png)
+![Wiring diagram](docs/Schematic.svg)
