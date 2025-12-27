@@ -9,6 +9,7 @@
 
 #include "UI_GameSelection.h"
 #include "UI_Home.h"
+#include "UI_ButtonssTest.h"
 
 enum class Screen {
   NONE,
@@ -29,8 +30,7 @@ class UI {
     //game list screen
     UI_GameSelection* gameSelection = nullptr;
     UI_Home* home = nullptr;
-
-    void screenButtonsTest() const;
+    UI_ButtonsTest* buttonsTest = nullptr;
 
   public:
     UI();

@@ -12,71 +12,6 @@ bool UI::begin(U8G2_SCREEN& u8x8, HID& hidInstance, FxManager& fxManagerInstance
   return true;
 }
 
-void UI::screenButtonsTest() const {
-  u8g2->clearBuffer();
-  u8g2->setFont(u8g2_font_4x6_tr);
-  u8g2->drawStr(55, 50, "Start");
-
-  u8g2->drawStr(48, 59, "Sellect");
-
-  //UP
-  if ((buttonsState & BUTTON_UP_MASK) != 0) {
-    u8g2->drawXBMP(21, 18, 7, 9, sprite_up_press);
-  } else {
-    u8g2->drawXBMP(21, 18, 7, 9, sprite_up);
-  }
-
-  //LEFT
-  if ((buttonsState & BUTTON_LEFT_MASK) != 0) {
-    u8g2->drawXBMP(14, 25, 9, 7, sprite_left_press);
-  } else {
-    u8g2->drawXBMP(14, 25, 9, 7, sprite_left);
-  }
-  //RIGHT
-  if ((buttonsState & BUTTON_RIGHT_MASK) != 0) {
-    u8g2->drawXBMP(26, 25, 9, 7, sprite_right_press);
-  } else {
-    u8g2->drawXBMP(26, 25, 9, 7, sprite_right);
-  }
-
-  //DOWN
-  if ((buttonsState & BUTTON_DOWN_MASK) != 0) {
-    u8g2->drawXBMP(21, 30, 7, 9, sprite_down_press);
-  } else {
-    u8g2->drawXBMP(21, 30, 7, 9, sprite_down);
-  }
-
-  //A
-  if ((buttonsState & BUTTON_A_MASK) != 0) {
-    u8g2->drawXBMP(106, 21, 11, 11, sprite_a_press);
-  } else {
-    u8g2->drawXBMP(106, 21, 11, 11, sprite_a);
-  }
-
-  //B
-  if ((buttonsState & BUTTON_B_MASK) != 0) {
-    u8g2->drawXBMP(94, 33, 11, 11, sprite_b_press);
-  } else {
-    u8g2->drawXBMP(94, 33, 11, 11, sprite_b);
-  }
-
-  //START
-  if ((buttonsState & BUTTON_START_MASK) != 0) {
-    u8g2->drawFilledEllipse(49, 47, 3, 3);
-  } else {
-    u8g2->drawEllipse(49, 47, 3, 3);
-  }
-
-  //SELECT
-  if ((buttonsState & BUTTON_SELECT_MASK) != 0) {
-    u8g2->drawFilledEllipse(42, 56, 3, 3);
-  } else {
-    u8g2->drawEllipse(42, 56, 3, 3);
-  }
-
-  u8g2->sendBuffer();
-}
-
 void UI::setScreen(Screen screen) {
   if (screen == currentScreen) {
     return;
@@ -95,6 +30,12 @@ void UI::setScreen(Screen screen) {
       gameSelection = nullptr;
     }
   }
+  if (currentScreen == Screen::BUTTONS_TEST) {
+    if (buttonsTest != nullptr) {
+      delete buttonsTest;
+      buttonsTest = nullptr;
+    }
+  }
 
   // initialize new screen
   if (screen == Screen::HOME) {
@@ -102,6 +43,9 @@ void UI::setScreen(Screen screen) {
   }
   if (screen == Screen::GAME_LIST) {
     gameSelection = new UI_GameSelection(*fxManager);
+  }
+  if (screen == Screen::BUTTONS_TEST) {
+    buttonsTest = new UI_ButtonsTest(*fxManager);
   }
 
   currentScreen = screen;
@@ -119,7 +63,9 @@ void UI::screenFlashGame() const {
 void UI::update() {
   switch (currentScreen) {
     case Screen::BUTTONS_TEST:
-      this->screenButtonsTest();
+      if (buttonsTest != nullptr) {
+        buttonsTest->draw();
+      }
       break;
     case Screen::GAME_LIST:
       if (gameSelection != nullptr) {
