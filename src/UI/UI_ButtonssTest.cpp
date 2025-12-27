@@ -15,7 +15,7 @@ void UI_ButtonsTest::draw() {
   fxManager->oled->u8g2.setFont(u8g2_font_4x6_tr);
   fxManager->oled->u8g2.drawStr(55, 50, "Start");
 
-  fxManager->oled->u8g2.drawStr(48, 59, "Sellect");
+  fxManager->oled->u8g2.drawStr(48, 59, "Select");
 
   //UP
   if ((buttonsState & BUTTON_UP_MASK) != 0) {
