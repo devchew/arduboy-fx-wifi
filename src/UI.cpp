@@ -8,6 +8,7 @@ bool UI::begin(U8G2_SCREEN& u8x8, HID& hidInstance, FxManager& fxManagerInstance
   hid = &hidInstance;
   fxManager = &fxManagerInstance;
 
+  setScreen(Screen::HOME);
   return true;
 }
 
@@ -76,35 +77,31 @@ void UI::screenButtonsTest() const {
   u8g2->sendBuffer();
 }
 
-void UI::splashScreen() {
-  if (millis() % 10 == 0) {
-    yOffset++;
-    u8g2->clearBuffer();
-    int position = -128 + yOffset;
-    u8g2->drawXBMP(0, position > 0 ? 0 : position , 128, 64, splashImage);
-    if (yOffset > 200) {
-      setScreen(Screen::GAME_LIST);
-      yOffset = 0;
-    }
-    u8g2->sendBuffer();
-  }
-}
-
-void UI::drawTextCenter(const char *text, int8_t x_offset, int8_t y_offset) const {
-  u8g2->setFont(u8g2_font_profont15_tr);
-  uint8_t textWidth = u8g2->getStrWidth(text);
-  u8g2->drawStr(((128 - textWidth) / 2) + x_offset, 34 + y_offset, text);
-}
-
 void UI::setScreen(Screen screen) {
+  if (screen == currentScreen) {
+    return;
+  }
 
-  if (screen == Screen::GAME_LIST) {
-    gameSelection = new UI_GameSelection(*fxManager);
-  } else {
+  // clean up
+  if (currentScreen == Screen::HOME) {
+    if (home != nullptr) {
+      delete home;
+      home = nullptr;
+    }
+  }
+  if (currentScreen == Screen::GAME_LIST) {
     if (gameSelection != nullptr) {
       delete gameSelection;
       gameSelection = nullptr;
     }
+  }
+
+  // initialize new screen
+  if (screen == Screen::HOME) {
+    home = new UI_Home(*fxManager);
+  }
+  if (screen == Screen::GAME_LIST) {
+    gameSelection = new UI_GameSelection(*fxManager);
   }
 
   currentScreen = screen;
@@ -121,9 +118,6 @@ void UI::screenFlashGame() const {
 
 void UI::update() {
   switch (currentScreen) {
-    case Screen::SPLASH:
-      this->splashScreen();
-      break;
     case Screen::BUTTONS_TEST:
       this->screenButtonsTest();
       break;
@@ -135,8 +129,13 @@ void UI::update() {
     case Screen::FLASH_GAME:
       this->screenFlashGame();
       break;
+    case Screen::HOME:
+      if (home != nullptr) {
+        home->draw();
+      }
+      break;
     default:
-      setScreen(Screen::SPLASH);
+      setScreen(Screen::HOME);
       break;
   }
 }

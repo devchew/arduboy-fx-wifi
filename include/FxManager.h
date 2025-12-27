@@ -42,6 +42,7 @@ class FxManager {
 
  private:
   bool initialized;
+  uint8_t longPressCounter = 0;
 
   void triStateSPIPins();
   void activateSPIPins();

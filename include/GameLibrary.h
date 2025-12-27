@@ -43,6 +43,7 @@ public:
 
   // load games from filesystem
   void loadGames(const String& rootPath);
+  void loadGames() { loadGames(GAME_LIBRARY_PATH); }
 
   // get category
   GameCategory getCategory(const uint8_t index) const;
