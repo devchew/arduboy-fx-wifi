@@ -38,7 +38,7 @@ GameInfo GameLibrary::findGameInFolder(const File &folder) const {
     gameFile ? String(gameFile.path()) : "",
     title,
     "",
-    gameFile ? String(gameFile.name()) : "",
+    "",
     "",
     ""
    };

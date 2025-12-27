@@ -24,8 +24,9 @@ UI_GameSelection::~UI_GameSelection() {
 void UI_GameSelection::drawGameSplashScreen(const GameInfo& game, int8_t x_offset, int8_t y_offset) const {
   fxManager->oled->u8g2.setFont(u8g2_font_profont15_tr);
   uint8_t textWidth = fxManager->oled->u8g2.getStrWidth(game.title.c_str());
-  fxManager->oled->u8g2.drawStr(((128 - textWidth) / 2) + x_offset, 20 + y_offset, game.title.c_str());
+  fxManager->oled->u8g2.drawStr(((128 - textWidth) / 2) + x_offset, 30 + y_offset, game.title.c_str());
 
+  fxManager->oled->u8g2.setFont(u8g2_font_4x6_tr);
   textWidth = fxManager->oled->u8g2.getStrWidth(game.author.c_str());
   fxManager->oled->u8g2.drawStr(((128 - textWidth) / 2) + x_offset, 40 + y_offset, game.author.c_str());
 }
@@ -33,12 +34,35 @@ void UI_GameSelection::drawGameSplashScreen(const GameInfo& game, int8_t x_offse
 void UI_GameSelection::drawCategoryScreen(const GameCategory &category, int8_t x_offset, int8_t y_offset) const {
   fxManager->oled->u8g2.setFont(u8g2_font_profont15_tr);
   uint8_t textWidth = fxManager->oled->u8g2.getStrWidth(category.categoryName.c_str());
-  fxManager->oled->u8g2.drawStr(((128 - textWidth) / 2) + x_offset, 20 + y_offset, category.categoryName.c_str());
+  fxManager->oled->u8g2.drawStr(((128 - textWidth) / 2) + x_offset, 30 + y_offset, category.categoryName.c_str());
 
   String gameCountText = String(gamesInCategory) + " games";
+  fxManager->oled->u8g2.setFont(u8g2_font_4x6_tr);
 
   textWidth = fxManager->oled->u8g2.getStrWidth(gameCountText.c_str());
   fxManager->oled->u8g2.drawStr(((128 - textWidth) / 2) + x_offset, 40 + y_offset, gameCountText.c_str());
+}
+
+void UI_GameSelection::drawNavbar() const {
+  fxManager->oled->u8g2.setFont(u8g2_font_4x6_tr);
+  fxManager->oled->u8g2.setFontMode(1);
+  fxManager->oled->u8g2.setBitmapMode(1);
+
+  fxManager->oled->u8g2.drawXBMP(3, 57, 3, 5, sprite_left_mini);
+  fxManager->oled->u8g2.drawStr(9, 62, "Type");
+  fxManager->oled->u8g2.drawXBMP(27, 57, 3, 5, sprite_right_mini);
+
+
+  fxManager->oled->u8g2.drawXBMP(37, 58, 5, 3, sprite_up_mini);
+  fxManager->oled->u8g2.drawStr(45, 62, "Game");
+  fxManager->oled->u8g2.drawXBMP(63, 58, 5, 3, sprite_down_mini);
+
+  fxManager->oled->u8g2.drawStr(75, 62, "Back");
+  if (!inCategoryScreen) {
+    fxManager->oled->u8g2.drawStr(104, 62, "Select");
+  }
+  fxManager->oled->u8g2.drawXBMP(92, 56, 11, 7, sprite_action_buttons_mini);
+
 }
 
 void UI_GameSelection::draw() {
@@ -89,6 +113,9 @@ void UI_GameSelection::draw() {
   }
 
   fxManager->oled->u8g2.clearBuffer();
+
+  drawNavbar();
+
   fxManager->oled->u8g2.setFont(u8g2_font_profont15_tr);
 
   if (inCategoryScreen) {

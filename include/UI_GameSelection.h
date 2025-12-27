@@ -35,6 +35,7 @@ class UI_GameSelection {
     void drawGameSplashScreen(const GameInfo& game, int8_t x_offset = 0, int8_t y_offset = 0) const;
     void drawCategoryScreen(const GameCategory& category, int8_t x_offset = 0, int8_t y_offset = 0) const;
 
+    void drawNavbar() const;
 
   public:
     UI_GameSelection(FxManager& fx);
