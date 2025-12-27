@@ -9,7 +9,7 @@
 #include "FileSystemManager.h"
 #include "OLEDController.h"
 #include "HID.h"
-#include "Games.h"
+#include "GameLibrary.h"
 #include "config.h"
 
 class UI;
@@ -29,14 +29,8 @@ class FxManager {
   void setMode(FxMode mode);
   FxMode getMode() const { return currentMode; }
   void flashGame(const String& filename);
-  void reset();
+  void reset() const;
   void printInfo();
-
-  GameInfo getGameInfo(const String& categoryPath = "", uint8_t offset = 0) const;
-
-  // get all categories list. Each categorry is a folder in /games
-  std::array<GamesCategory, MAX_CATEGORIES> getCategories();
-
 
   FileSystemManager* fileSystem;
   FxMode currentMode;
@@ -44,6 +38,7 @@ class FxManager {
   OLEDController* oled;
   UI* ui;
   HID* hid;
+  GameLibrary* gameLibrary;
 
  private:
   bool initialized;
