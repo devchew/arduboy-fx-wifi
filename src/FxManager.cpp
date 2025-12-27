@@ -59,7 +59,7 @@ bool FxManager::begin() {
   gameLibrary->begin(*fileSystem);
 
   // this will load games from /arduboy directory on SD card
-  // it add a couple of seconds to boot time, need to optimize later
+  // it adds a couple of seconds to boot time, need to optimize later
   gameLibrary->loadGames();
 
   initialized = true;
