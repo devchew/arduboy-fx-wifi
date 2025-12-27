@@ -36,7 +36,7 @@ void UI_Settings::draw() {
   }
   if (fxManager->hid->pressed(Buttons::DOWN)) {
     delay(200); // simple debounce
-    if (currentPosition < 1) {
+    if (!options.empty() && (currentPosition + 1) < options.size()) {
       currentPosition++;
     }
   }
