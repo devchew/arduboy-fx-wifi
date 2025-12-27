@@ -50,7 +50,7 @@ bool FxManager::begin() {
   }
 
   ui = new UI();
-  if (!ui->begin(oled->u8g2, *hid, *this)) {
+  if (!ui->begin(*this)) {
     Logger::error("Failed to initialize UI!");
     return false;
   }

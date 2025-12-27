@@ -3,9 +3,7 @@
 UI::UI() {}
 UI::~UI() = default;
 
-bool UI::begin(U8G2_SCREEN& u8x8, HID& hidInstance, FxManager& fxManagerInstance) {
-  u8g2 = &u8x8;
-  hid = &hidInstance;
+bool UI::begin(FxManager& fxManagerInstance) {
   fxManager = &fxManagerInstance;
 
   setScreen(Screen::HOME);
@@ -53,10 +51,10 @@ void UI::setScreen(Screen screen) {
 }
 
 void UI::screenFlashGame() const {
-  u8g2->clearBuffer();
-  u8g2->setFont(u8g2_font_profont15_tr);
-  u8g2->drawStr(18, 34, "Flashing game");
-  u8g2->sendBuffer();
+  fxManager->oled->u8g2.clearBuffer();
+  fxManager->oled->u8g2.setFont(u8g2_font_profont15_tr);
+  fxManager->oled->u8g2.drawStr(18, 34, "Flashing game");
+  fxManager->oled->u8g2.sendBuffer();
 }
 
 

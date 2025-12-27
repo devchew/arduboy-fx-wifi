@@ -21,8 +21,6 @@ enum class Screen {
 
 class UI {
   private:
-    U8G2_SCREEN* u8g2 = nullptr;
-    HID* hid = nullptr;
     FxManager* fxManager = nullptr;
     uint8_t buttonsState = -1;
     Screen currentScreen = Screen::NONE;
@@ -35,7 +33,7 @@ class UI {
   public:
     UI();
     ~UI();
-    bool begin(U8G2_SCREEN& u8g2, HID& hid, FxManager& fxManager);
+    bool begin(FxManager& fxManager);
     void update();
     void setScreen(Screen screen);
     void screenFlashGame() const ;
