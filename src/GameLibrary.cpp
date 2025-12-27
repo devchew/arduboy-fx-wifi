@@ -34,8 +34,12 @@ GameInfo GameLibrary::findGameInFolder(const File &folder) const {
     gameFile = gameFile.openNextFile();
   }
 
+  String filePath = String(gameFile.path());
+
+  gameFile.close();
+
   return GameInfo{
-    gameFile ? String(gameFile.path()) : "",
+    filePath,
     title,
     "",
     "",
@@ -93,6 +97,8 @@ void GameLibrary::loadGames(const String& rootPath) {
       gameFile = entry.openNextFile();
     }
 
+    gameFile.close();
+
     extractCategoryMetadata(entry, category);
     category.games = gamesInCategory;
 
@@ -122,8 +128,8 @@ uint8_t GameLibrary::getGamesCount(const uint8_t category_index) const {
 }
 
 GameInfo GameLibrary::getGameInfo(const uint8_t category_index, const uint8_t game_index) const {
-  if (category_index > games.size()) {
-    return GameInfo{ "", "Unknown categorry", "", "", "", "" };
+  if (category_index >= games.size()) {
+    return GameInfo{ "", "Unknown category", "", "", "", "" };
   }
   const Games& category = games.at(category_index);
   if (game_index >= category.games.size()) {

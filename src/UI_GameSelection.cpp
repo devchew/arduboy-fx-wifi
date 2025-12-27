@@ -9,6 +9,10 @@
 
 UI_GameSelection::UI_GameSelection(FxManager& fx) {
   fxManager = &fx;
+  if (fxManager == nullptr || fxManager->gameLibrary == nullptr) {
+    Logger::error("FxManager or GameLibrary is null in UI_GameSelection");
+    return;
+  }
   currentGame = fxManager->gameLibrary->getGameInfo(currentCategoryIndex, currentGameIndex);
   currentCategory = fxManager->gameLibrary->getCategory(currentCategoryIndex);
   gamesInCategory = fxManager->gameLibrary->getGamesCount(currentCategoryIndex);
@@ -17,8 +21,6 @@ UI_GameSelection::UI_GameSelection(FxManager& fx) {
 
 UI_GameSelection::~UI_GameSelection() {
   fxManager = nullptr;
-  delete &currentGame;
-  delete &currentCategory;
 }
 
 void UI_GameSelection::drawGameSplashScreen(const GameInfo& game, int8_t x_offset, int8_t y_offset) const {
@@ -107,7 +109,7 @@ void UI_GameSelection::draw() {
     }
   }
 
-  if (fxManager->hid->pressed(Buttons::A) && currentGame.filePath.length() > 0 && currentGameIndex > 0) {
+  if (fxManager->hid->pressed(Buttons::A) && !inCategoryScreen) {
     delay(200); // simple debounce
     fxManager->flashGame(currentGame.filePath.c_str());
   }
