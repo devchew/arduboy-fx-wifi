@@ -34,6 +34,12 @@ void UI::setScreen(Screen screen) {
       buttonsTest = nullptr;
     }
   }
+  if (currentScreen == Screen::SETTINGS) {
+    if (settings != nullptr) {
+      delete settings;
+      settings = nullptr;
+    }
+  }
 
   // initialize new screen
   if (screen == Screen::HOME) {
@@ -44,6 +50,9 @@ void UI::setScreen(Screen screen) {
   }
   if (screen == Screen::BUTTONS_TEST) {
     buttonsTest = new UI_ButtonsTest(*fxManager);
+  }
+  if (screen == Screen::SETTINGS) {
+    settings = new UI_Settings(*fxManager);
   }
 
   currentScreen = screen;
@@ -76,6 +85,11 @@ void UI::update() {
     case Screen::HOME:
       if (home != nullptr) {
         home->draw();
+      }
+      break;
+    case Screen::SETTINGS:
+      if (settings != nullptr) {
+        settings->draw();
       }
       break;
     default:

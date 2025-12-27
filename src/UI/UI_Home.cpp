@@ -57,7 +57,7 @@ void UI_Home::draw() {
   }
   if (fxManager->hid->pressed(Buttons::LEFT)) {
     delay(200); // simple debounce
-    fxManager->ui->setScreen(Screen::BUTTONS_TEST);
+    fxManager->ui->setScreen(Screen::SETTINGS);
   }
 
   if (fxManager->hid->pressed(Buttons::A)) {

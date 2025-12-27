@@ -10,13 +10,15 @@
 #include "UI_GameSelection.h"
 #include "UI_Home.h"
 #include "UI_ButtonssTest.h"
+#include "UI_Settings.h"
 
 enum class Screen {
   NONE,
   BUTTONS_TEST,
   GAME_LIST,
   FLASH_GAME,
-  HOME
+  HOME,
+  SETTINGS
 };
 
 class UI {
@@ -28,6 +30,7 @@ class UI {
     UI_GameSelection* gameSelection = nullptr;
     UI_Home* home = nullptr;
     UI_ButtonsTest* buttonsTest = nullptr;
+    UI_Settings* settings = nullptr;
 
   public:
     UI();

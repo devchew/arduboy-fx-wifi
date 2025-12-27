@@ -5,7 +5,6 @@
 #ifndef ARDUBOY_FX_WIFI_UI_Buttons_H
 #define ARDUBOY_FX_WIFI_UI_Buttons_H
 
-
 #include <Arduino.h>
 #include <U8g2lib.h>
 #include "FxManager.h"
