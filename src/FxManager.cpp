@@ -77,9 +77,6 @@ void FxManager::update() {
 
   if (currentMode == FxMode::MASTER) {
     ui->update();
-    if (hid->pressed(Buttons::START)) {
-      setMode(FxMode::GAME);
-    }
   }
 
   if (currentMode == FxMode::GAME) {
