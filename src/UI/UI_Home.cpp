@@ -42,7 +42,7 @@ void UI_Home::draw() {
   // Layer 13
   fxManager->oled->u8g2.drawStr(7, 62, "Settings");
 
-  // splish
+  // splash
   fxManager->oled->u8g2.drawXBMP(20, 2, 88, 25, sprite_splash);
 
   // Layer 13 copy
