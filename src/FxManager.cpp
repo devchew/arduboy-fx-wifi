@@ -7,6 +7,7 @@ FxManager::FxManager() {
   oled = nullptr;
   ui = nullptr;
   hid = nullptr;
+  gameLibrary = nullptr;
   initialized = false;
   currentMode = FxMode::MASTER;
 }
@@ -15,6 +16,9 @@ FxManager::~FxManager() {
   delete arduboy;
   delete fileSystem;
   delete oled;
+  delete ui;
+  delete hid;
+  delete gameLibrary;
 }
 
 bool FxManager::begin() {
@@ -50,6 +54,11 @@ bool FxManager::begin() {
     Logger::error("Failed to initialize UI!");
     return false;
   }
+
+  gameLibrary = new GameLibrary();
+  gameLibrary->begin(*fileSystem);
+
+  gameLibrary->loadGames("/arduboy");
 
   initialized = true;
 
@@ -188,129 +197,7 @@ void FxManager::flashGame(const String& filename) {
   setMode(FxMode::GAME);
 }
 
-std::array<GamesCategory, MAX_CATEGORIES> FxManager::getCategories() {
-  String gamesRoot = "/arduboy";
-
-  std::array<GamesCategory, MAX_CATEGORIES> categories = {};
-  if (!initialized) {
-    Logger::error("FxManager not initialized");
-    return categories;
-  }
-
-  if (!fileSystem) {
-    Logger::error("Filesystem not initialized");
-    return categories;
-  }
-
-  File gamesDir = fileSystem->openFile(gamesRoot);
-  if (!gamesDir || !gamesDir.isDirectory()) {
-    Logger::error("Games directory not found: %s\n", gamesRoot.c_str());
-    return categories;
-  }
-
-  uint8_t index = 0;
-  File entry = gamesDir.openNextFile();
-  while (entry && index < MAX_CATEGORIES) {
-    if (!entry.isDirectory()) {
-      Logger::info("[FILE skipped] %s (%u bytes)\n", entry.name(), entry.size());
-      entry = gamesDir.openNextFile();
-      continue;
-    }
-    String childName = String(entry.name());
-    String subPath;
-    if (childName.length() > 0 && childName.charAt(0) == '/') {
-      subPath = childName;
-    } else {
-      subPath = gamesRoot;
-      if (!subPath.endsWith("/")) subPath += "/";
-      subPath += childName;
-    }
-    categories[index].categoryName = childName;
-    categories[index].categoryPath = subPath;
-    categories[index].gameCount = 0;
-
-    Logger::info("[DIR CAT] %s/ %s\n", entry.name(), subPath.c_str());
-
-    // Count games in this category
-    File subRoot = fileSystem->openFile(subPath);
-    if (subRoot) {
-      File subFile = subRoot.openNextFile();
-      while (subFile) {
-        Logger::info("[DIR GAME]  %s/\n", subFile.name());
-        categories[index].gameCount++;
-        subFile.close();
-        subFile = subRoot.openNextFile();
-      }
-      subRoot.close();
-    } else {
-      Logger::error("Failed to open subdirectory: %s\n", subPath.c_str());
-    }
-
-    index++;
-    entry = gamesDir.openNextFile();
-  }
-
-  return categories;
-
-}
-
-GameInfo FxManager::getGameInfo(const String &categoryPath, uint8_t offset) const {
-  if (!initialized) {
-    Logger::error("FxManager not initialized");
-    return GameInfo{ "", "Error", "", "", "", ""  };
-  }
-  if (!fileSystem) {
-    Logger::error("Filesystem not initialized");
-    return GameInfo{ "", "Error", "", "", "", ""  };
-  }
-
-  File categoryDir = fileSystem->openFile(categoryPath);
-  if (!categoryDir || !categoryDir.isDirectory()) {
-    Logger::error("Category directory not found: %s\n", categoryPath.c_str());
-    return GameInfo{ "", "Error", "", "", "", ""  };
-  }
-  uint8_t index = 0;
-  File entry = categoryDir.openNextFile();
-  while (entry) {
-    if (!entry.isDirectory()) {
-      entry = categoryDir.openNextFile();
-      continue;
-    }
-    if (index < offset) {
-      index++;
-      entry = categoryDir.openNextFile();
-      continue;
-    }
-    // Found the game path, it should be a first .hex file inside this directory
-    File gameDir = fileSystem->openFile(entry.path());
-    if (!gameDir || !gameDir.isDirectory()) {
-      Logger::error("Game directory not found: %s\n", entry.name());
-      return GameInfo{ "", "Error", "", "", "", ""  };
-    }
-    File gameFile = gameDir.openNextFile();
-    String title = String(entry.name());
-    while (gameFile) {
-      String filename = String(gameFile.name());
-      if (filename.endsWith(".hex")) {
-        // this is the hex file, exit the loop
-        break;
-      }
-      gameFile = gameFile.openNextFile();
-    }
-
-    return GameInfo{
-      gameFile ? String(gameFile.path()) : "",
-      title,
-      "",
-      gameFile ? String(gameFile.name()) : "",
-      "",
-      ""
-     };
-  }
-  return GameInfo{ "", "Error", "", "", "", ""  };
-}
-
-void FxManager::reset() {
+void FxManager::reset() const {
   if (!initialized) {
     Logger::error("FxManager not initialized");
     return;

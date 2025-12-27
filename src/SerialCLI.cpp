@@ -74,19 +74,73 @@ void SerialCLI::update() {
       return;
     }
 
-    if (command== "games") {
-      auto categories = fxManager->getCategories();
-      if (categories[0].categoryName.length() == 0) {
-        Serial.println("No game categories found.");
+    if (command== "lg") {
+      fxManager->gameLibrary->loadGames("/arduboy");
+      return;
+    }
+
+    if (command == "categories") {
+      int categoryCount = fxManager->gameLibrary->getCategoryCount();
+      Serial.println("Game Categories:");
+      for (int i = 0; i < categoryCount; i++) {
+        GameCategory category = fxManager->gameLibrary->getCategory(i);
+        Serial.println(String(i) + ": " + category.categoryName + " (" +
+                       String(fxManager->gameLibrary->getGamesCount(i)) + " games)");
+      }
+      return;
+    }
+
+    if (command == "games") {
+      if (args.length() == 0) {
+        Serial.println("Usage: games <category index>");
         return;
       }
-      for ( const auto& category : categories) {
-        if (category.categoryName.length() == 0) {
-          break;
-        }
-        Serial.printf("Category: %s (%u games)\n", category.categoryName.c_str(), category.gameCount);
+      int categoryIndex = args.toInt();
+      GameCategory category = fxManager->gameLibrary->getCategory(categoryIndex);
+      if (category.categoryName.length() == 0) {
+        Serial.println("Invalid category index");
+        return;
       }
+      int gameCount = fxManager->gameLibrary->getGamesCount(categoryIndex);
+      Serial.println("Games in Category: " + category.categoryName);
+      for (int i = 0; i < gameCount; i++) {
+        GameInfo game = fxManager->gameLibrary->getGameInfo(categoryIndex, i);
+        Serial.println(String(i) + ": " + game.title + " by " + game.author);
+      }
+      return;
+    }
 
+    if (command == "game") {
+      if (args.length() == 0) {
+        Serial.println("Usage: game <category index> <game index>");
+        return;
+      }
+      int spaceIdx = args.indexOf(' ');
+      if (spaceIdx == -1) {
+        Serial.println("Usage: game <category index> <game index>");
+        return;
+      }
+      String categoryStr = args.substring(0, spaceIdx);
+      String gameStr = args.substring(spaceIdx + 1);
+      int categoryIndex = categoryStr.toInt();
+      int gameIndex = gameStr.toInt();
+      GameCategory category = fxManager->gameLibrary->getCategory(categoryIndex);
+      if (category.categoryName.length() == 0) {
+        Serial.println("Invalid category index");
+        return;
+      }
+      GameInfo game = fxManager->gameLibrary->getGameInfo(categoryIndex, gameIndex);
+      if (game.filePath.length() == 0) {
+        Serial.println("Invalid game index");
+        return;
+      }
+      // print game info
+      Serial.println("Game Info:");
+      Serial.println("Title: " + game.title);
+      Serial.println("Author: " + game.author);
+      Serial.println("Date: " + game.date);
+      Serial.println("Description: " + game.description);
+      Serial.println("License: " + game.license);
       return;
     }
 
