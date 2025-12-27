@@ -22,7 +22,6 @@ enum class Screen {
 class UI {
   private:
     FxManager* fxManager = nullptr;
-    uint8_t buttonsState = -1;
     Screen currentScreen = Screen::NONE;
 
     //game list screen
