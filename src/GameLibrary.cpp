@@ -34,12 +34,12 @@ GameInfo GameLibrary::findGameInFolder(const File &folder) const {
     gameFile = gameFile.openNextFile();
   }
 
-  String filePath = String(gameFile.path());
+  String filename = String(gameFile.path());
 
   gameFile.close();
 
   return GameInfo{
-    filePath,
+    filename,
     title,
     "",
     "",

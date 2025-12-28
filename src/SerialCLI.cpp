@@ -58,10 +58,29 @@ void SerialCLI::update() {
 
     if (command == "flash") {
       if (args.length() == 0) {
-        Serial.println("Usage: flash <filename>");
+        Serial.println("Usage: flash <category index> <game index>");
         return;
       }
-      fxManager->flashGame(args);
+      int spaceIdx = args.indexOf(' ');
+      if (spaceIdx == -1) {
+        Serial.println("Usage: flash <category index> <game index>");
+        return;
+      }
+      String categoryStr = args.substring(0, spaceIdx);
+      String gameStr = args.substring(spaceIdx + 1);
+      int categoryIndex = categoryStr.toInt();
+      int gameIndex = gameStr.toInt();
+      GameCategory category = fxManager->gameLibrary->getCategory(categoryIndex);
+      if (category.categoryName.length() == 0) {
+        Serial.println("Invalid category index");
+        return;
+      }
+      GameInfo game = fxManager->gameLibrary->getGameInfo(categoryIndex, gameIndex);
+      if (game.filePath.length() == 0) {
+        Serial.println("Invalid game index");
+        return;
+      }
+      fxManager->flashGame(game);
       return;
     }
 

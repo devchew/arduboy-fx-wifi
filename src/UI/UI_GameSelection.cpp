@@ -134,7 +134,7 @@ bool UI_GameSelection::handleHid() {
 
   if (fxManager->hid->pressed(Buttons::A) && !inCategoryScreen) {
     delay(200); // simple debounce
-    fxManager->flashGame(currentGame.filePath.c_str());
+    fxManager->flashGame(currentGame);
   }
 
   return false;

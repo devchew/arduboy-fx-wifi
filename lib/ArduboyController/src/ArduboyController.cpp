@@ -114,7 +114,6 @@ bool ArduboyController::flash(File& file) {
   // Apply OLED patch if needed
   if (!hexParser->modifyBuffer(oledSSD1309Patch, nullptr)) {
     Logger::error("Failed to apply OLED patch to HEX file");
-    return false;
   }
 
   // Initialize ISP programmer

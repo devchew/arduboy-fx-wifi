@@ -144,7 +144,7 @@ void FxManager::setMode(FxMode mode) {
   }
 }
 
-void FxManager::flashGame(const String& filename) {
+void FxManager::flashGame(const GameInfo& game) {
   if (!initialized) {
     Logger::error("FxManager not initialized");
     return;
@@ -152,24 +152,18 @@ void FxManager::flashGame(const String& filename) {
 
   setMode(FxMode::PROGRAMMING);
 
-  if (filename.length() == 0) {
-    Logger::error("Usage: flash <filename>");
-    Logger::error("Available HEX files:");
-    if (fileSystem) {
-      fileSystem->listHexFiles();
-    }
+  if (game.filePath.length() == 0) {
+    Logger::error("No filename provided for flashing");
     return;
   }
 
-  String filepath = filename.startsWith("/") ? filename : "/" + filename;
-
-  if (!fileSystem || !fileSystem->fileExists(filepath)) {
-    Logger::error("File not found: %s\n" , filepath.c_str());
+  if (!fileSystem || !fileSystem->fileExists(game.filePath)) {
+    Logger::error("File not found: %s\n" , game.filePath.c_str());
     return;
   }
 
-  if (!fileSystem->isValidHexFile(filepath)) {
-    Logger::error("Invalid HEX file: %s\n" , filepath.c_str());
+  if (!fileSystem->isValidHexFile(game.filePath)) {
+    Logger::error("Invalid HEX file: %s\n" , game.filePath.c_str());
     return;
   }
 
@@ -178,9 +172,9 @@ void FxManager::flashGame(const String& filename) {
     return;
   }
 
-  File file = fileSystem->openFile(filepath);
+  File file = fileSystem->openFile(game.filePath);
   if (!file) {
-    Logger::error("Failed to open file: %s\n" , filepath.c_str());
+    Logger::error("Failed to open file: %s\n" , game.filePath.c_str());
     return;
   }
 
@@ -192,6 +186,10 @@ void FxManager::flashGame(const String& filename) {
   } else {
     Logger::error("Flash operation failed");
   }
+
+  currentFlashedGame = success ? new GameInfo(game) : nullptr;
+
+  file.close();
 
   setMode(FxMode::GAME);
 }

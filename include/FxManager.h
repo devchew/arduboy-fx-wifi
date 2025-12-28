@@ -28,7 +28,7 @@ class FxManager {
   void update();
   void setMode(FxMode mode);
   FxMode getMode() const { return currentMode; }
-  void flashGame(const String& filename);
+  void flashGame(const GameInfo& game);
   void reset() const;
   void printInfo();
 
@@ -39,6 +39,8 @@ class FxManager {
   UI* ui;
   HID* hid;
   GameLibrary* gameLibrary;
+
+  GameInfo* currentFlashedGame = nullptr;
 
  private:
   bool initialized;
