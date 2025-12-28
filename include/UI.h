@@ -6,40 +6,36 @@
 #include "HID.h"
 #include "FxManager.h"
 #include <Sprites.h>
-#include <deque>
 
 #include "UI_GameSelection.h"
+#include "UI_Home.h"
+#include "UI_ButtonssTest.h"
+#include "UI_Settings.h"
 
 enum class Screen {
-  SPLASH,
+  NONE,
   BUTTONS_TEST,
   GAME_LIST,
   FLASH_GAME,
+  HOME,
+  SETTINGS
 };
 
 class UI {
   private:
-    U8G2_SCREEN* u8g2 = nullptr;
-    HID* hid = nullptr;
     FxManager* fxManager = nullptr;
-    uint8_t buttonsState = -1;
-    Screen currentScreen = Screen::SPLASH;
-
-    //splashScreen
-    int yOffset = 0;
+    Screen currentScreen = Screen::NONE;
 
     //game list screen
     UI_GameSelection* gameSelection = nullptr;
-
-    void drawTextCenter(const char* text, int8_t x_offset = 0, int8_t y_offset = 0) const;
-
-    void screenButtonsTest() const;
-    void splashScreen() ;
+    UI_Home* home = nullptr;
+    UI_ButtonsTest* buttonsTest = nullptr;
+    UI_Settings* settings = nullptr;
 
   public:
     UI();
     ~UI();
-    bool begin(U8G2_SCREEN& u8g2, HID& hid, FxManager& fxManager);
+    bool begin(FxManager& fxManager);
     void update();
     void setScreen(Screen screen);
     void screenFlashGame() const ;

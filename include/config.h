@@ -43,6 +43,7 @@
 #define SD_MOSI_PIN      2
 #define SD_MISO_PIN      4
 #define SD_SCK_PIN       3
+#define GAME_LIBRARY_PATH   "/arduboy"
 
 // ==========================================
 // Buttons pins

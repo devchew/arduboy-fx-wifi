@@ -114,6 +114,12 @@ void UI_GameSelection::draw() {
     fxManager->flashGame(currentGame.filePath.c_str());
   }
 
+  if (fxManager->hid->pressed(Buttons::B)) {
+    delay(200); // simple debounce
+    fxManager->ui->setScreen(Screen::HOME);
+    return;
+  }
+
   fxManager->oled->u8g2.clearBuffer();
 
   drawNavbar();
