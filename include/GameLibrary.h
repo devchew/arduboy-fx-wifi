@@ -30,6 +30,7 @@ private:
   std::vector<Games> games = {};
   FileSystemManager* fileSystemManager = nullptr;
 
+  void loadLibraryFromFolder();
   GameInfo findGameInFolder(const File& folder) const;
   void extractCategoryMetadata(const File &folder, GameCategory &outCategory);
 
@@ -42,16 +43,17 @@ public:
   void end();
 
   // load games from filesystem
-  void loadGames(const String& rootPath);
-  void loadGames() { loadGames(GAME_LIBRARY_PATH); }
+  void loadGames();
+  bool loading = true;
+  bool loaded = false;
 
   // get category
-  GameCategory getCategory(const uint8_t index) const;
+  GameCategory getCategory(uint8_t index) const;
   uint8_t getCategoryCount() const;
 
   // get games in category
-  uint8_t getGamesCount(const uint8_t category_index) const;
-  GameInfo getGameInfo(const uint8_t category_index, const uint8_t game_index) const;
+  uint8_t getGamesCount(uint8_t category_index) const;
+  GameInfo getGameInfo(uint8_t category_index, uint8_t game_index) const;
 
 };
 

@@ -1,24 +1,7 @@
 #include "UI.h"
 
 UI::UI() {}
-UI::~UI() {
-  if (home != nullptr) {
-    delete home;
-    home = nullptr;
-  }
-  if (gameSelection != nullptr) {
-    delete gameSelection;
-    gameSelection = nullptr;
-  }
-  if (buttonsTest != nullptr) {
-    delete buttonsTest;
-    buttonsTest = nullptr;
-  }
-  if (settings != nullptr) {
-    delete settings;
-    settings = nullptr;
-  }
-}
+UI::~UI() = default;
 
 bool UI::begin(FxManager& fxManagerInstance) {
   fxManager = &fxManagerInstance;
@@ -114,6 +97,7 @@ void UI::update() {
       break;
   }
 }
+
 
 
 

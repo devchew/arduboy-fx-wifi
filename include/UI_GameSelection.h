@@ -23,12 +23,15 @@ class UI_GameSelection {
     int xOffset = 0;
     // one game before, current game, one game after index
 
+    bool handleHid();
+    void loadCurrentSelection();
 
     uint8_t currentCategoryIndex = 0;
     uint8_t categoriesCount = 0;
     uint8_t currentGameIndex = 0;
     uint8_t gamesInCategory = 0;
     bool inCategoryScreen = true;
+    bool needsReload = true;
     GameInfo currentGame = GameInfo();
     GameCategory currentCategory = GameCategory();
 

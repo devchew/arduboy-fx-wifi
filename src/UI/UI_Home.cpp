@@ -54,15 +54,18 @@ void UI_Home::draw() {
   if (fxManager->hid->pressed(Buttons::RIGHT)) {
     delay(200); // simple debounce
     fxManager->ui->setScreen(Screen::GAME_LIST);
+    return;
   }
   if (fxManager->hid->pressed(Buttons::LEFT)) {
     delay(200); // simple debounce
     fxManager->ui->setScreen(Screen::SETTINGS);
+    return;
   }
 
   if (fxManager->hid->pressed(Buttons::A)) {
     delay(200); // simple debounce
     fxManager->setMode(FxMode::GAME);
+    return;
   }
 
 

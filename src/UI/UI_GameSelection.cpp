@@ -9,14 +9,7 @@
 
 UI_GameSelection::UI_GameSelection(FxManager& fx) {
   fxManager = &fx;
-  if (fxManager == nullptr || fxManager->gameLibrary == nullptr) {
-    Logger::error("FxManager or GameLibrary is null in UI_GameSelection");
-    return;
-  }
-  currentGame = fxManager->gameLibrary->getGameInfo(currentCategoryIndex, currentGameIndex);
-  currentCategory = fxManager->gameLibrary->getCategory(currentCategoryIndex);
-  gamesInCategory = fxManager->gameLibrary->getGamesCount(currentCategoryIndex);
-  categoriesCount = fxManager->gameLibrary->getCategoryCount();
+  loadCurrentSelection();
 }
 
 UI_GameSelection::~UI_GameSelection() {
@@ -47,8 +40,13 @@ void UI_GameSelection::drawCategoryScreen(const GameCategory &category, int8_t x
 
 void UI_GameSelection::drawNavbar() const {
   fxManager->oled->u8g2.setFont(u8g2_font_4x6_tr);
-  fxManager->oled->u8g2.setFontMode(1);
-  fxManager->oled->u8g2.setBitmapMode(1);
+
+  fxManager->oled->u8g2.drawStr(75, 62, "Back");
+  fxManager->oled->u8g2.drawXBMP(92, 56, 11, 7, sprite_action_buttons_mini);
+
+  if (fxManager->gameLibrary->loading) {
+    return;
+  }
 
   fxManager->oled->u8g2.drawXBMP(3, 57, 3, 5, sprite_left_mini);
   fxManager->oled->u8g2.drawStr(9, 62, "Type");
@@ -59,15 +57,40 @@ void UI_GameSelection::drawNavbar() const {
   fxManager->oled->u8g2.drawStr(45, 62, "Game");
   fxManager->oled->u8g2.drawXBMP(63, 58, 5, 3, sprite_down_mini);
 
-  fxManager->oled->u8g2.drawStr(75, 62, "Back");
   if (!inCategoryScreen) {
     fxManager->oled->u8g2.drawStr(104, 62, "Select");
   }
-  fxManager->oled->u8g2.drawXBMP(92, 56, 11, 7, sprite_action_buttons_mini);
 
 }
 
-void UI_GameSelection::draw() {
+void UI_GameSelection::loadCurrentSelection() {
+  if (!needsReload) {
+    return;
+  }
+  if (fxManager == nullptr || fxManager->gameLibrary == nullptr) {
+    return;
+  }
+  if (fxManager->gameLibrary->loaded) {
+    currentGame = fxManager->gameLibrary->getGameInfo(currentCategoryIndex, currentGameIndex);
+    currentCategory = fxManager->gameLibrary->getCategory(currentCategoryIndex);
+    gamesInCategory = fxManager->gameLibrary->getGamesCount(currentCategoryIndex);
+    categoriesCount = fxManager->gameLibrary->getCategoryCount();
+    needsReload = false;
+  }
+}
+
+bool UI_GameSelection::handleHid() {
+
+  if (fxManager->hid->pressed(Buttons::B)) {
+    delay(200); // simple debounce
+    fxManager->ui->setScreen(Screen::HOME);
+    return true;
+  }
+
+  if (fxManager->gameLibrary->loading) {
+    return false;
+  }
+
   if (fxManager->hid->pressed(Buttons::RIGHT) && currentCategoryIndex < categoriesCount - 1) {
     delay(200); // simple debounce
     currentCategoryIndex ++;
@@ -114,9 +137,12 @@ void UI_GameSelection::draw() {
     fxManager->flashGame(currentGame.filePath.c_str());
   }
 
-  if (fxManager->hid->pressed(Buttons::B)) {
-    delay(200); // simple debounce
-    fxManager->ui->setScreen(Screen::HOME);
+  return false;
+
+}
+
+void UI_GameSelection::draw() {
+  if (this->handleHid()) {
     return;
   }
 
@@ -126,6 +152,14 @@ void UI_GameSelection::draw() {
 
   fxManager->oled->u8g2.setFont(u8g2_font_profont15_tr);
 
+  if (fxManager->gameLibrary->loading) {
+    const char* loadingText = "Loading...";
+    uint8_t textWidth = fxManager->oled->u8g2.getStrWidth(loadingText);
+    fxManager->oled->u8g2.drawStr((128 - textWidth) / 2, 30, loadingText);
+    fxManager->oled->u8g2.sendBuffer();
+    return;
+  }
+
   if (inCategoryScreen) {
     this->drawCategoryScreen(currentCategory);
   } else {
@@ -134,6 +168,7 @@ void UI_GameSelection::draw() {
 
   fxManager->oled->u8g2.sendBuffer();
 
+  loadCurrentSelection();
 }
 
 // void UI_GameSelection::draw() {

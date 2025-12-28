@@ -55,7 +55,7 @@ void GameLibrary::extractCategoryMetadata(const File &folder, GameCategory &outC
   outCategory.categoryPath = String(folder.name());
 }
 
-void GameLibrary::loadGames(const String& rootPath) {
+void GameLibrary::loadLibraryFromFolder() {
   if (!fileSystemManager || !fileSystemManager->isInitialized()) {
     Logger::error("FileSystemManager not initialized");
     return;
@@ -63,9 +63,9 @@ void GameLibrary::loadGames(const String& rootPath) {
 
   games.clear();
 
-  File gamesDir = fileSystemManager->openFile(rootPath);
+  File gamesDir = fileSystemManager->openFile(GAME_LIBRARY_PATH);
   if (!gamesDir || !gamesDir.isDirectory()) {
-    Logger::error("Games directory not found: %s\n", rootPath.c_str());
+    Logger::error("Games directory not found: %s\n", GAME_LIBRARY_PATH);
     return;
   }
 
@@ -109,7 +109,39 @@ void GameLibrary::loadGames(const String& rootPath) {
   gamesDir.close();
 }
 
-GameCategory GameLibrary::getCategory(const uint8_t index) const {
+void GameLibrary::loadGames() {
+  TaskHandle_t gamesLoaderTask = nullptr;
+  xTaskCreatePinnedToCore(
+    [](void* param) {
+      GameLibrary* library = static_cast<GameLibrary*>(param);
+      if (!library) {
+        Logger::error("GameLibrary pointer is null in LoadGamesTask");
+        vTaskDelete(nullptr);
+        return;
+      }
+
+      library->loading = true;
+      library->loaded = false;
+
+      Logger::info("Loading game library from filesystem...");
+      library->loadLibraryFromFolder();
+      Logger::info("Game library loaded: %u categories\n", library->getCategoryCount());
+
+      library->loading = false;
+      library->loaded = true;
+
+      vTaskDelete(nullptr);
+    },
+    "LoadGamesTask",
+    8192,
+    this,
+    1,
+    &gamesLoaderTask,
+    1
+  );
+}
+
+GameCategory GameLibrary::getCategory(uint8_t index) const {
   if (index >= games.size()) {
     return GameCategory{ "", "" };
   }
@@ -120,14 +152,14 @@ uint8_t GameLibrary::getCategoryCount() const {
   return games.size();
 }
 
-uint8_t GameLibrary::getGamesCount(const uint8_t category_index) const {
+uint8_t GameLibrary::getGamesCount(uint8_t category_index) const {
   if (category_index < games.size()) {
     return games.at(category_index).games.size();
   }
   return 0;
 }
 
-GameInfo GameLibrary::getGameInfo(const uint8_t category_index, const uint8_t game_index) const {
+GameInfo GameLibrary::getGameInfo(uint8_t category_index, uint8_t game_index) const {
   if (category_index >= games.size()) {
     return GameInfo{ "", "Unknown category", "", "", "", "" };
   }

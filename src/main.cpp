@@ -47,7 +47,7 @@ void initializeWiFi() {
 
 void setup() {
   Serial.begin(SERIAL_BAUD_RATE);
-  Logger::set_level(Logger::Level::ERROR);
+  Logger::set_level(Logger::Level::WARNING);
 
   Logger::info("Starting Arduboy FX WiFi Programmer...");
 

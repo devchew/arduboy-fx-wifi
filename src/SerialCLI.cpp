@@ -75,7 +75,7 @@ void SerialCLI::update() {
     }
 
     if (command== "lg") {
-      fxManager->gameLibrary->loadGames("/arduboy");
+      fxManager->gameLibrary->loadGames();
       return;
     }
 
